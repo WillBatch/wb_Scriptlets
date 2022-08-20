@@ -1,0 +1,9 @@
+const { layerRect } = footage("anchorfunctions.jsx").sourceData.getFunctions();
+var posterizeCheckbox = effect("teXtAnchor")("Freeze Calculations");
+posterizeCheckbox == 1 ? posterizeTimeValue = 0 : posterizeTimeValue = 1.0 / thisComp.frameDuration;
+posterizeTime(posterizeTimeValue);
+var l = thisComp.layer(effect("teXtAnchor")("Text Layer").name);
+var xHeightPositions = l.effect("teXtAnchor")("Position").value - 1;
+var xHeightText = ["leftCenter", "center", "rightCenter", "topLeft", "topCenter", "topRight", "bottomLeft", "bottomCenter", "bottomRight"];
+var valueAtTimeArray = [time,effect("teXtAnchor")("Value At Time")];
+layerRect({  l, sampleTime: valueAtTimeArray[posterizeCheckbox], anchor: xHeightText[xHeightPositions] , xHeight : false}).position[0];
