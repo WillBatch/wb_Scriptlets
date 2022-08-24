@@ -1,11 +1,8 @@
+$.evalFile("src/expressions.jsx");
 var proj = app.project;
 var comp = app.project.activeItem;
 var functionImportFile = "anchorfunctions.jsx";
-//var pseudoEffectFile = File("./src/teXtAnchor_1.ffx");
-var xHeightAnchorExpression = File("./src/xHeightAnchor.txt");
-var sourceRectAnchorExpression = File("./src/sourceRect.txt");
-var xAnchorExpression = File("./src/xAnchor.txt");
-var textAnchorExpression = File("./src/textAnchor.txt");
+
 // first get the Folder Path
 var scriptFolderPath = (File($.fileName)).parent.absoluteURI;
 // create the preset File
@@ -15,9 +12,7 @@ null;
 }else{
     alert("can't find preset");
 };
-
-
-
+app.beginUndoGroup("Text Anchor");
 var activeLayer = checkForTextLayer(comp);
 //Deselects All Layers
 for(var i = 1; i <= comp.numLayers; i++){
@@ -29,15 +24,18 @@ activeLayer.selected = true;
 comp.selectedLayers[0].applyPreset(pseudoEffectFile);
 
 var xAnchorSlider = activeLayer.property("ADBE Effect Parade").property("Pseudo/84913ID/teXtAnchor").property("Pseudo/84913ID/teXtAnchor-0006");
-xAnchorSlider.expression = readExpression(xAnchorExpression);
+xAnchorSlider.expression = xAnchorExpression;
 var xHeightSlider = activeLayer.property("ADBE Effect Parade").property("Pseudo/84913ID/teXtAnchor").property("Pseudo/84913ID/teXtAnchor-0007");
-xHeightSlider.expression = readExpression(xHeightAnchorExpression);
+xHeightSlider.expression = yAnchorDescendersExpression;
 var sourceRectSlider = activeLayer.property("ADBE Effect Parade").property("Pseudo/84913ID/teXtAnchor").property("Pseudo/84913ID/teXtAnchor-0008");
-sourceRectSlider.expression = readExpression(sourceRectAnchorExpression);
-activeLayer.property("ADBE Transform Group").property("ADBE Anchor Point").expression = readExpression(textAnchorExpression);
+sourceRectSlider.expression = yAnchorSourceRectExpression;
+activeLayer.property("ADBE Transform Group").property("ADBE Anchor Point").expression = textLayerAnchorExpression;
 
 checkForaeFunctionsLibrary(proj);
 activeLayer.selected = true;
+
+app.endUndoGroup();
+
 function checkForaeFunctionsLibrary(proj){
     for(i = 1; i <= proj.items.length; i++){
         if (proj.item(i).name == "anchorfunctions.jsx"){
@@ -93,20 +91,6 @@ function createTextLayer(comp){
     newTextLayer.property("Position").dimensionsSeparated = true;
 
     return newTextLayer;
-}
-
-
-//Read Expression Functions
-function readExpression(file){
-
-    file.open("r");
-        while(!file.eof){
-        
-            currentTxt = file.read();
-        }
-        file.close();
-
-        return currentTxt;
 }
 
 function checkInComp(comp, footage){

@@ -1,38 +1,21 @@
-$.evalFile("src/UsefulExpressions.jsx");
-$.evalFile("src/ApplyPseudoEffectBinary.jsx");
+$.evalFile("src/expressions.jsx");
+//$.evalFile("src/ApplyPseudoEffectBinary.jsx");
 
-var positionExpressionText = File("./src/positionExpression.txt");
-var positionExpression = readTxt(positionExpressionText);
 
 // first get the Folder Path
 var scriptFolderPath = (File($.fileName)).parent.absoluteURI;
 // create the preset File
-/*var pseudoEffectFile = new File(scriptFolderPath+"/"+"anchor.ffx");
+var pseudoEffectFile = new File(scriptFolderPath+"/"+"src/shapeanchor.ffx");
 if(pseudoEffectFile.exists){
 null;
 }else{
     alert("can't find preset");
 };
-*/
 
 
-function readTxt(file){
-    //var currentLine;
-    //var textArray = [];
-    file.open("r");
-        while(!file.eof){
-            //currentLine = file.readln();
-            //textArray.push(currentLine);
-            currentTxt = file.read();
-        }
-        file.close();
-        //return textArray;
-        return currentTxt;
-}
-//alert(fileData);
 
 var activeComp = app.project.activeItem;
-app.beginUndoGroup("Adds Animation Control Null");
+app.beginUndoGroup("Adds Anchor and Expressions");
 
 var activeLayer = checkForShapeLayer(activeComp);
 var shapeType = getShapeType(activeLayer);
@@ -44,9 +27,7 @@ for(var i = 1; i <= activeComp.numLayers; i++){
 activeLayer.selected = true;
 
 //Applies pseudo effect
-//activeComp.selectedLayers[0].applyPreset(pseudoEffectFile);
-
-var pseudoEffectFile = runApplyPreset();
+activeComp.selectedLayers[0].applyPreset(pseudoEffectFile);
 
 addExpressionToShapePosition(activeLayer, shapeType, positionExpression);
 xPositionCenter(activeLayer, shapeType);

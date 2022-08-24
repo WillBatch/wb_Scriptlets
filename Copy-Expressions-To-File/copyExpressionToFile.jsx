@@ -5,19 +5,14 @@ var compLayers = comp.numLayers;
 var nullArray = [];
 
 
-for(i = 1; i <= numberOfNulls; i++){
-    var nullLayer = comp.layer(i);
-    
-    nullArray.push(nullLayer);
-    
-    }
-expressionRefresh(nullArray);
+
+expressionRefresh();
 expressionsToText();
 
-function expressionRefresh(nul){
-    for(i = 0; i < nul.length; i++){
-        var nulLayer = nul[i];
-        var nulPropsGroup = nulLayer.property("ADBE Effect Parade");
+function expressionRefresh(){
+    for(i = 1; i <= compLayers; i++){
+        var layer = comp.layer(i);
+        var nulPropsGroup = layer.property("ADBE Effect Parade");
         var nulPropsCount = nulPropsGroup.numProperties;
         
         for(n = 1; n <= nulPropsCount; n++){
@@ -101,10 +96,10 @@ function expressionsToText(){
 }
 }
 
-function expressionText(nul){
+function expressionText(){
     var expressionArray = [];
-    for(i = 0; i < nul.length; i++){
-        var nulLayer = nul[i];
+    for(i = 1; i <= compLayers; i++){
+        var nulLayer = comp.layer(i);
         
         var nulPropsGroup = nulLayer.property("ADBE Effect Parade");
         var nulPropsCount = nulPropsGroup.numProperties;
@@ -112,11 +107,13 @@ function expressionText(nul){
         for(n = 1; n <= nulPropsCount; n++){
             var nulPropsTarget = nulPropsGroup.property(n).property(1);
            if(nulPropsTarget.expressionEnabled == true){
+            alert(nulPropsTarget);
                 //var controlsString = JSON.stringify(nulPropsGroup.property(n).name);
                 var controlsRenamed = nulPropsGroup.property(n).name.replace(/ /g, "");
                 //alert(controlsRenamed);
-                var expressionLineBreaks = nulPropsTarget.expression.replace(/\n/g, "\\" + "\n");
-                alert(JSON.stringify(expressionLineBreaks));
+                var expressionLineBreaksConverter = nulPropsTarget.expression.replace(/\r/g, "" );
+                var expressionLineBreaks = expressionLineBreaksConverter.replace(/\n/g, "\\" + "\n");
+                //alert(JSON.stringify(expressionLineBreaks));
             expressionArray.push("var " + controlsRenamed + " = \"" + expressionLineBreaks.replace(/\"/g, "\\" + "\"") + "\";"  + "\n\n\n");
            }
         }

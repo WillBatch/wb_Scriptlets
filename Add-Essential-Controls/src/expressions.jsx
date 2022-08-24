@@ -26,7 +26,26 @@ b = linear(time, thisComp.duration - fadeTimeOut, thisComp.duration - framesToTi
 a - b";
 
 //COLOR EXPRESSIONS
+function addDropDownMenuControl(layer, effectparams, effectname){
+//var activeLayer = comp.selectedLayers[0];
+//Adds Drop Down Menu
+layer.property("ADBE Effect Parade").addProperty("Dropdown Menu Control").property("Menu");
+/*var effectparams = [
+    "Left",
+    "Center",
+    "Right",
+    "Top Left",
+    "Top Center",
+    "Top Right",
+    "Bottom Left",
+    "Bottom Center",
+    "Bottom Right"
+    ];
+*/    
+    var dropDownMenu = layer.property("ADBE Effect Parade").property("Dropdown Menu Control");
+    var temp = dropDownMenu.property("Menu").setPropertyParameters(effectparams);
+    temp.propertyGroup(1).name = effectname;
+    
 
-
-
+}
 

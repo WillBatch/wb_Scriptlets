@@ -1,7 +1,0 @@
-switch(effect("teXtAnchor")("Y Anchor Select").value){
-case 1: a = effect("teXtAnchor")("yAnchorDescenders");
-break;	
-case 2: a = effect("teXtAnchor")("yAnchorSourceRect");
-break;
-	}
-[effect("teXtAnchor")("xAnchor"), a] + value
