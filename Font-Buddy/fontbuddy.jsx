@@ -21,8 +21,12 @@ var scriptIconsRightAlign = ScriptUI.newImage(iconsRightAlign.a, iconsRightAlign
 var mainWindow = new Window("palette", "Font Buddy", undefined);
 // mainWindow.orientation = "column";
 
+
 var imageGroup = mainWindow.add("group", undefined, "imageGroup");
 imageGroup.orientation = "row"
+var listBox = imageGroup.add("listbox", undefined, []);
+listBox.selection = 0;
+listBox.size = [100, 80];
 var newFontBuddy = imageGroup.add("iconbutton", undefined, scriptIconsNewFontBuddy,{style:"toolbutton"});
 newFontBuddy.size = [20,20];
 newFontBuddy.helpTip = "Create a new Font Buddy composition";
@@ -32,12 +36,22 @@ refreshFontBuddy.helpTip = "Refresh";
 var newTextControlLayers = imageGroup.add("iconbutton", undefined, scriptIconsnewTextControlLayers,{style:"toolbutton"});
 newTextControlLayers.size = [100,31];
 
-var addtext = imageGroup.add("button", undefined, "Add Text");
-addtext.size = [60,20];
-var unlink = imageGroup.add("button", undefined, "Unlink Controllers");
-unlinksize = [80,20];
-var relink = imageGroup.add("button", undefined, "Relink");
-relink = [80,20];
+var imageGroupTwo = mainWindow.add("group", undefined, "imageGroup");
+imageGroupTwo.orientation = "row"
+var addtext = imageGroupTwo.add("button", undefined, "Add Text");
+addtext.size = [70,20];
+var unlink = imageGroupTwo.add("button", undefined, "Unlink");
+unlink.size = [70,20];
+var relink = imageGroupTwo.add("button", undefined, "Relink");
+relink.size = [70,20];
+var fbcompbutton = imageGroupTwo.add("button", undefined, "InsertFBCOMP");
+fbcompbutton.size = [70,20];
+// fbcompbutton.value = 1;
+fbcompbutton.helpTip = "Adds Font Buddy to Comp";
+var updatedropdownsButton = imageGroupTwo.add("button", undefined, "Update");
+updatedropdownsButton.size = [70,20];
+// fbcompbutton.value = 1;
+updatedropdownsButton.helpTip = "Updates Controllers if changes are made to Font Buddy comp";
 
 var statictext = imageGroup.add("statictext", undefined, "");
 
@@ -45,49 +59,66 @@ var groupThree = mainWindow.add("group", undefined, groupThree);
 groupThree.orientation = "row";
 var iconLeftAlignButton = groupThree.add("iconbutton", undefined, scriptIconsLeftAlign,{style:"toolbutton", toggle:true});
 iconLeftAlignButton.size = alignButtonSize;
+iconLeftAlignButton.value = 1;
 var iconCenterAlignButton = groupThree.add("iconbutton", undefined, scriptIconsCenterAlign,{style:"toolbutton", toggle:true});
 iconCenterAlignButton.size = alignButtonSize;
+iconCenterAlignButton.value = 0;
 var iconRightAlignButton = groupThree.add("iconbutton", undefined, scriptIconsRightAlign,{style:"toolbutton", toggle:true});
 iconRightAlignButton.size = alignButtonSize;
+iconRightAlignButton.value = 0;
 
 var closeButton = groupThree.add("button", undefined, "Close");
+
+var groupFour = mainWindow.add("group", undefined, groupFour);
+groupFour.orientation = "row";
+var testingButton = groupFour.add("button", undefined, "TESTING");
 
 
 mainWindow.center();
 mainWindow.show();
 
-
-
+//Button Functions
 newFontBuddy.onClick = function(){
-      app.beginUndoGroup("Create Text Controllers");
-      
+            
       var fontBuddyComp = checkFontBuddyComp();
-      fontBuddyComp != undefined ? null : addFontBuddyCompAndFolder();
-      
+      fontBuddyComp != undefined ? null() : addFontBuddyCompAndFolder();
 
-      app.endUndoGroup();
+
+
 }
-
 refreshFontBuddy.onClick = function(){
-    app.beginUndoGroup("Create Text Controllers");
     
-    alert("TBD");
-    
-    app.endUndoGroup();
-}
+    refreshListItemBoxContents();
 
+}
+listBox.onDoubleClick = function () {
+    var fontbuddycomp = getFontBuddyComp();
+    var textlayer = this.selection.text;
+    var selLayers = [];
+    fontbuddycomp.openInViewer();
+    if(fontbuddycomp.layer(textlayer)!= undefined){
+        for(var i = 0; i < fontbuddycomp.selectedLayers.length; i++){
+            selLayers.push(fontbuddycomp.selectedLayers[i]);
+        }
+        for(var n = 0; n < selLayers.length; n++){
+            selLayers[n].selected = false;
+        }
+        fontbuddycomp.layer(textlayer).selected = true;
+    }
+    
+}
 newTextControlLayers.onClick = function(){
     app.beginUndoGroup("Create Text Controllers");
     var curComp = proj.activeItem;
     if(curComp.name != fbCompName){
     var comp = getFontBuddyComp();
     createTextControllers(comp, curComp);
+    app.endUndoGroup();
     }else{
         alert("Can't add control layers to Font Buddy Comp!");
     }
-    app.endUndoGroup();
-}
 
+}
 addtext.onClick = function(){
     var curComp = proj.activeItem;
     app.beginUndoGroup("");
@@ -95,16 +126,40 @@ addtext.onClick = function(){
     app.endUndoGroup();
 }
 unlink.onClick = function(){
+    //alert();
     var curComp = proj.activeItem;
     app.beginUndoGroup("");
     unlinkTextControllers(curComp);
     app.endUndoGroup();
 }
 relink.onClick = function(){
+    //alert();
     var curComp = proj.activeItem;
-    app.beginUndoGroup("");
+    app.beginUndoGroup("relink");
     relinkTextControllers(curComp);
     app.endUndoGroup();
+}
+closeButton.onClick = function() {
+    mainWindow.hide();
+}
+fbcompbutton.onClick = function(){
+    
+    addFontBuddyCompToComp(proj.activeItem, getFontBuddyComp());
+    
+}
+updatedropdownsButton.onClick = function(){
+    app.beginUndoGroup("update");
+    updateDropDownsOnControllers(proj.activeItem, getFontBuddyComp());
+    app.endUndoGroup();
+}
+
+
+testingButton.onClick = function(){
+    var comp = getFontBuddyComp();
+    var layers = getFontBuddyLayerNames(comp);
+    addIndexSliderForFontBuddyComp(comp, layers);
+    
+    // addIndexSliderForFontBuddyComp(comp, layers);
 }
 
 
@@ -114,6 +169,7 @@ var fbCompName = "_Font Buddy";
 var fbFolderName = "_Font Buddy";
 var numberOfTextLayers = 3;
 var textNames = ["Style-1", "Style-2", "Style-3"];
+var commentName = "Font Buddy Control Layer";
 //var numberOfTextLayers = editNames.text.split(",").length;
 
 try{
@@ -122,9 +178,7 @@ try{
     var compProps = [fbCompName, 1920, 1080, 1, 10, 30];
     }
 
-
-
-
+//Functions
 function copy(){
     //app.beginUndoGroup("Refresh");
 
@@ -152,25 +206,26 @@ function paste(){
     //alert(statictext.text);
 }
 
-closeButton.onClick = function() {
-        mainWindow.hide();
-    }
- 
-
-
-
 function createTextControllers(comp, curComp){
-    var textNames = [];
     
-    for(n = 1; n <= comp.numLayers; n++){
-        textNames.push(comp.layer(n).name);
+    //checks for list items. if none, will refresh first
+    if(listBox.items.length == 0){
+        refreshListItemBoxContents();
     }
+    //converts listitems into string array
+    var textNames = [];
+    for(var i = 0; i < listBox.items.length; i++){
+        textNames.push(listBox.items[i].text.toString());
+    }
+    //Adds and formats text controllers
     for(var i = 1; i <= comp.numLayers; i++){
-
-        //var reverseCount = numberOfTextLayers + 1 - i;
+        
         var text = curComp.layers.addText(textNames[i-1] + " Controller");
         text.guideLayer = true;
         text.label = 2;
+        //Markers
+        var addMarker = new MarkerValue(commentName);
+        text.marker.setValueAtTime(0, addMarker);
         var textProp = text.property("Source Text");
         var textDocument = textProp.value;
         textDocument.font = getFonts(i, comp);
@@ -180,10 +235,10 @@ function createTextControllers(comp, curComp){
         linkToFontBuddyDropDown(text, i);
         i == 1 ? text.moveToBeginning() : text.moveAfter(curComp.layer(i));
         
-        /*var sourceText = text.property("ADBE Text Properties").property("ADBE Text Document");
+        var sourceText = text.property("ADBE Text Properties").property("ADBE Text Document");
 
-        text.sourceText.expression = textControllerExpression + a + "\")" + ".text.sourceText.style";
-        */
+        sourceText.expression = linkControllersToDropDown;
+        
     }
 }
 
@@ -216,6 +271,12 @@ for(var i = 1; i<=numberOfTextLayers; i++){
     textLayer.moveToEnd();
     textLayer.property("ADBE Transform Group").property("ADBE Position").setValue([-300, i * 100] + positionOffset);
 }
+
+//adds fontbuddy comp to current composition
+addFontBuddyCompToComp();
+refreshListItemBoxContents();
+
+
 return comp;
 
 }
@@ -291,16 +352,21 @@ function getFontBuddyComp(){
     return comp
 }
 
-
 function linkToFontBuddyDropDown(layer, select){
 
     var comp = getFontBuddyComp();
-    
+    //converts listitems into string array for drop down menu
     var layerArray = [];
-    var compItems = comp.numLayers;
-    for(var i = 1; i <= compItems; i++){
-        layerArray.push(comp.layer(i).name);
+
+    for(var i = 0; i < listBox.items.length; i++){
+        layerArray.push(listBox.items[i].text.toString());
     }
+
+    // 
+    // var compItems = comp.numLayers;
+    // for(var i = 1; i <= compItems; i++){
+    //     layerArray.push(comp.layer(i).name);
+    // }
     
         var boxLayerDropdown = layer.Effects.addProperty("ADBE Dropdown Control");
         var temp = boxLayerDropdown.property(1).setPropertyParameters(layerArray);
@@ -345,7 +411,7 @@ function addTextLayersLinkedToControllers(curComp){
             alert("Please select a controller layer");
         }else{
             for(var m = 0; m < maxArrayLength; m++){
-                addLeftAlignText(leftTextArray[m, curComp]);
+                addLeftAlignText(leftTextArray[m], curComp);
                 addCenterAlignText(centerTextArray[m], curComp);
                 addRightAlignText(rightTextArray[m], curComp);                
             }
@@ -389,40 +455,265 @@ function addRightAlignText(array, curComp){
         rightTextProps.expression = "thisComp.layer(\"" + layername + "\").text.sourceText.style";
     }
 }
-
 function unlinkTextControllers(curComp){
+    var selLayers = [];
     for(var i = 0; i < curComp.selectedLayers.length; i++){
-        var layer = curComp.selectedLayers[i];
-        var textProp = layer.property("Source Text");
+        selLayers.push(curComp.selectedLayers[i].name);
+    }
+    for(var j = 0; j < selLayers.length; j++){
+        var activelayer = curComp.layer(selLayers[j]);
+        var name = activelayer.name;
+        var textProp = activelayer.property("Source Text");
         var textDocument = textProp.value;
         textProp.expression = "";
-        textProp.setValue(textDocument)
-        layer.property("Effects").property("Link-To-Font-Buddy").remove();
+        textProp.setValue(textDocument);
+        if(activelayer.property("Effects").property("Link-To-Font-Buddy") != undefined){
+            activelayer.property("Effects").property("Link-To-Font-Buddy").remove();
+        }
+        
+        activelayer.name = name;
 
     }
+       
 }
 function relinkTextControllers(curComp){
-   
-alert();
-        var comp = getFontBuddyComp();
-    
-        var layerArray = [];
-        var compItems = comp.numLayers;
-        for(var i = 1; i <= compItems; i++){
-            layerArray.push(comp.layer(i).name);
-        }
+    //Relinks selected controller layer to selected listbox item selection
 
+    //Checks for existing drop down controller. If found, will remove it and replace it.
+
+    //Checks for selected listbox item. If none, returns the first item
+    
+    if(listBox.selection != null){
+        var listSelection = listBox.selection.index + 1;
+
+        //converts listitems into string array for drop down menu
+        var styles = [];
+        for(var i = 0; i < listBox.items.length; i++){
+        styles.push(listBox.items[i].text.toString());
+        }
 
         for(var i = 0; i < curComp.selectedLayers.length; i++){
         var layer = curComp.selectedLayers[i];
-        var boxLayerDropdown = layer.Effects.addProperty("ADBE Dropdown Control");
-        var temp = boxLayerDropdown.property(1).setPropertyParameters(layerArray);
-        temp.propertyGroup(1).name = "Link-To-Font-Buddy";
-        //var textProp = layer.property("Source Text");
-        //var textDocument = textProp.value;
 
+            if(layer.Effects.property("Link-To-Font-Buddy") == null){
+               
+            var boxLayerDropdown = layer.Effects.addProperty("ADBE Dropdown Control");
+            }else{
+            var boxLayerDropdown = layer.Effects.property("Link-To-Font-Buddy");
+            }
 
-        // temp.setValue(select);
+            var temp = boxLayerDropdown.property(1).setPropertyParameters(styles);
+            temp.propertyGroup(1).name = "Link-To-Font-Buddy";
+            temp.setValue(listSelection);
+            var sourceText = layer.property("ADBE Text Properties").property("ADBE Text Document");
+            sourceText.expression = linkControllersToDropDown;
+            layer.name = listBox.selection.text + " Controller";
 
     }
+
+    }else{
+        alert("Please select a style to copy");
+    }
+       
+}
+function addFontBuddyCompToComp(){
+    app.beginUndoGroup("addfbcomptocomp");
+    var comp = getFontBuddyComp();
+    var curComp = proj.activeItem;
+    var checkComp = false;
+    for(var i = 1; i <= curComp.numLayers; i++){
+        
+        if((curComp.layer(i).name == fbCompName) && !(curComp.layer(i) instanceof TextLayer)  && !(curComp.layer(i) instanceof ShapeLayer) && !(curComp.layer(i) instanceof SolidSource)){
+            alert("Font Buddy is already in your composition");
+            var checkComp = true;
+            break
+        }
+    }
+    if(checkComp == false){
+        // alert("false");
+        var compprops = curComp.layers.add(comp);     
+        compprops.enabled = false;
+        compprops.shy = true;
+        compprops.moveToEnd();
+        
+        compprops.label = 11; 
+        compprops.locked = true; 
+        
+    }
+    app.endUndoGroup();
+}
+function updateDropDownsOnControllers(curComp){
+    //refreshes list items
+    refreshListItemBoxContents();
+
+    //converts listitems into string array for drop down menu
+    var styles = [];
+
+        for(var i = 0; i < listBox.items.length; i++){
+        styles.push(listBox.items[i].text.toString());
+    }
+
+    //Builds array of text controllers - searches for drop down menu effect - ends if effect is missing
+    var controllers = [];
+
+    for(var n = 1; n <= curComp.numLayers; n++){
+        //CHECK FOR MARKERS FIRST
+
+        if(curComp.layer(n).marker.numKeys > 0  ){
+
+            if(curComp.layer(n).property('Marker').keyValue(1).comment == commentName){        
+                controllers.push(curComp.layer(n).name);                 
+                }                  
+        }
+    }
+
+
+    //If there are layers added to font buddy or the same amount
+    if(listBox.items.length >= controllers.length){
+        for(var m = 0; m < listBox.items.length; m++){
+            
+            var currentController = curComp.layer(controllers[m]);
+             
+            if(currentController != undefined){
+                
+                var name = currentController.name;
+                var textProp = currentController.property("Source Text");
+                var textDocument = textProp.value;
+                textProp.expression = "";
+                textProp.setValue(textDocument);
+                //Checks for drop down and adds if missing
+                if(currentController.property("Effects").property("Link-To-Font-Buddy") != undefined){
+                    currentController.property("Effects").property("Link-To-Font-Buddy").remove();  
+                }
+
+                currentController.name = name;
+                var boxLayerDropdown = currentController.Effects.addProperty("ADBE Dropdown Control");
+                var temp = boxLayerDropdown.property(1).setPropertyParameters(styles);
+                temp.propertyGroup(1).name = "Link-To-Font-Buddy";
+                temp.setValue(m+1);
+                var sourceText = currentController.property("ADBE Text Properties").property("ADBE Text Document");
+                sourceText.expression = linkControllersToDropDown
+                
+            }else{
+                
+                var text = curComp.layers.addText(styles[m] + " Controller");
+                var boxLayerDropdown = text.Effects.addProperty("ADBE Dropdown Control");
+                var temp = boxLayerDropdown.property(1).setPropertyParameters(styles);
+                temp.propertyGroup(1).name = "Link-To-Font-Buddy";
+                temp.setValue(m+1);
+                text.guideLayer = true;
+                text.label = 2;
+                //Markers
+                var addMarker = new MarkerValue(commentName);
+                text.marker.setValueAtTime(0, addMarker);
+                text.moveAfter(curComp.layer(m+1));
+                var sourceText = text.property("ADBE Text Properties").property("ADBE Text Document");
+                sourceText.expression = linkControllersToDropDown;
+            }
+        }
+    }
+
+    if(listBox.items.length < controllers.length){
+        var recommendedSelections = listBox.items.length;
+        if(curComp.selectedLayers.length == recommendedSelections){
+
+            selArray = [];
+
+            for(var b = 0; b < curComp.selectedLayers.length; b++){
+                selArray.push(curComp.selectedLayers[b].name);
+            }
+
+             deleteArray = [];
+
+                for(d = 0; d < controllers.length; d++){
+                    if(curComp.layer(controllers[d]).selected == false){
+                        deleteArray.push(controllers[d]);
+                    }
+                }
+                for(c = 0; c < deleteArray.length; c++){
+                    curComp.layer(deleteArray[c]).remove();
+                }
+
+
+        }else{
+            
+            alert("Found more Text Control Layers than Font Buddy Layers.\n\nSelect " + recommendedSelections + " Text Control Layers to keep.\n\nThe rest will be deleted.");
+
+        }
+    }
+}
+
+
+
+function getFontBuddyLayerNames(comp){
+    var layers = [];
+    for(var i = 1; i <= comp.numLayers; i++){
+        layers.push(comp.layer(i).name);
+    }
+    return layers;
+}
+function getFontBuddyLayers(comp){
+    var layers = [];
+    for(var i = 1; i <= comp.numLayers; i++){
+        layers.push(comp.layer(i));
+    }
+    return layers;
+}
+function addIndexSliderForFontBuddyComp(comp, layers){
+
+        var sliderName = "font-buddy-index";
+        var layersWithSliders = [];
+        var layersWithoutSliders = [];
+        var sliderIndexArray = [];
+        //Checks to see if slider exists
+        
+        for(var i = 0; i < layers.length; i++){
+            if(comp.layer(layers[i]).property("ADBE Effect Parade").property(sliderName)!= undefined){            
+                layersWithSliders.push(comp.layer(layers[i]).name);
+            }
+        }
+
+        for(var n = 0; n < layers.length; n++){
+            if(comp.layer(layers[n]).property("ADBE Effect Parade").property(sliderName) == undefined){            
+                layersWithoutSliders.push(comp.layer(layers[n]).name);
+            }
+        }
+        //Gets index array information from the layers with sliders, sorts it, returns highest value
+
+        for(var m = 0; m < layersWithSliders.length; m++){
+            // alert(comp.layer(layersWithSliders[m]).property("ADBE Effect Parade").property(sliderName).property("ADBE Slider Control-0001").value);
+            sliderIndexArray.push(comp.layer(layersWithSliders[m]).property("ADBE Effect Parade").property(sliderName).property("ADBE Slider Control-0001").value)
+        }
+            var sortedIndexArray = sliderIndexArray.sort(function(a, b){return a - b});
+            var highestIndex = (sortedIndexArray[sliderIndexArray.length - 1]);
+
+        for(var j = 1; j <= layersWithoutSliders.length; j++){
+            var newSlider = comp.layer(layersWithoutSliders[j-1]).property("ADBE Effect Parade").addProperty("ADBE Slider Control");
+            newSlider.name = sliderName;
+            newSlider.property("ADBE Slider Control-0001").setValue(highestIndex + j);
+        }
+}
+function refreshListItemBoxContents(){
+    var fontbuddycomp = getFontBuddyComp();
+    //removes all items first
+    
+    // alert(listboxitems[1]);
+    if(listBox.items.length != 0){
+        // var listboxitems = listBox.items;
+        for(n = listBox.items.length - 1; n >= 0; n--){
+            // alert(listBox.items[n]);
+            listBox.remove(listBox.items[n]);
+        }
+    }
+       
+    
+    for(var i = 1; i <= fontbuddycomp.numLayers; i++){
+        var t = fontbuddycomp.layer(i).name;
+        
+        listBox.add("item", t);
+    }
+        // listBox.add("item", "Item_"+counter.toString());
+    
+
+
 }
