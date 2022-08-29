@@ -170,7 +170,10 @@ var fbFolderName = "_Font Buddy";
 var numberOfTextLayers = 3;
 var textNames = ["Style-1", "Style-2", "Style-3"];
 var commentName = "Font Buddy Control Layer";
+
 //var numberOfTextLayers = editNames.text.split(",").length;
+
+
 
 try{
     var compProps = [fbCompName,curComp.width, curComp.height,1, curComp.duration, curComp.frameRate];
@@ -348,7 +351,7 @@ function getFontBuddyComp(){
         }
     }
    
-    comp == false ? alert("No font buddy comp found") : null;
+    // comp == false ? alert("No font buddy comp found") : null;
     return comp
 }
 
@@ -642,8 +645,6 @@ function updateDropDownsOnControllers(curComp){
         }
     }
 }
-
-
 
 function getFontBuddyLayerNames(comp){
     var layers = [];
