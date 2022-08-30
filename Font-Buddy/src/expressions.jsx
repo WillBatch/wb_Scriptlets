@@ -1,14 +1,74 @@
 var textControllerExpression = "comp(\"_Font Buddy\").layer(\"Style-";
 
+var fontBuddyTextLayerExpression = "posterizeTime(0);thisLayer.name";
+
 var linkControllersToDropDown = "select = effect(\"Link-To-Font-Buddy\")(\"Menu\").value;\
 fontbuddytext = comp(\"_Font Buddy\").layer(select).text.sourceText;\
-const { style } = fontbuddytext;\
+const { font } = fontbuddytext.style;\
 try{var m = thisLayer.marker.key(\"Font Buddy Control Layer\")}catch(err){m = null}\
 if(m != null){\
-style.setText(fontbuddytext + \" Controller\")\
+style.setFont(font);\
 }else{\
-	\"Do not delete this marker\"\
+	\"Do not modify or remove this marker\"\
 }";
+
+
+
+var linkTextToDropDownExpression = "select = effect(\"Link-To-Font-Buddy\")(\"Menu\").value;\
+fontbuddytext = comp(\"_Font Buddy\").layer(select).text.sourceText;\
+const { font } = fontbuddytext.style;\
+style.setText(fontbuddytext + \" Controller\").setFont(font)";
+
+
+var textControllersSourceTextExpression = "try{select = effect(\"Link-To-Font-Buddy\")(\"Menu\").value}catch(err){select = null};\
+try{fontbuddytext = comp(\"_Font Buddy\").layer(select).text.sourceText}catch(err){fontbuddytext = thisLayer.text.sourceText};\
+const { font } = fontbuddytext.style;\
+if(effect(\"Essential-Graphics-Controls\")(\"Parent Layer\") == undefined){\
+	var parent = thisLayer;\
+}else{parent = effect(\"Essential-Graphics-Controls\")(\"Parent Layer\");}\
+switch(effect(\"Essential-Graphics-Controls\")(\"Link Properties To Parent\").value){\
+	case 0: l = thisLayer;\
+	break;\
+	case 1: l = parent;\
+	break;\
+}\
+function getFontSize(layer){\
+	if(effect(\"Essential-Graphics-Controls\")(\"Link Properties To Parent\") == 0){\
+		f = effect(\"Essential-Graphics-Controls\")(\"Font Size\").value;\
+	}else{\
+		f = mul(layer.effect(\"Essential-Graphics-Controls\")(\"Font Size\"), div(effect(\"Essential-Graphics-Controls\")(\"Font Size From Parent\"), 100));\
+	}\
+	return f\
+}\
+var egc = l.text.sourceText.style\
+.setFont(font)\
+.setFontSize(getFontSize(l))\
+.setAutoLeading(l.effect(\"Essential-Graphics-Controls\")(\"Auto-Leading\").value)\
+.setLeading(l.effect(\"Essential-Graphics-Controls\")(\"Leading\"))\
+.setTracking(l.effect(\"Essential-Graphics-Controls\")(\"Tracking\"))\
+.setFillColor(l.effect(\"Essential-Graphics-Controls\")(\"Fill Color\"))\
+try{var m = thisLayer.marker.key(\"Font Buddy Control Layer\")}catch(err){m = null}\
+if(m != null){\
+	switch(effect(\"Essential-Graphics-Controls\")(\"Enable\").value){\
+		case 0: fontbuddytext.style;\
+		break;\
+		case 1: egc;\
+		break;\
+	}\
+}else{\
+	\"Do not modify or remove this marker\"\
+}\ ";
+
+
+
+
+
+
+
+
+
+
+
 
 
 
