@@ -60,9 +60,44 @@ if(m != null){\
 }\ ";
 
 
+var leftTextOpacityExpression = "try{select = thisComp.layer(\"_Font Buddy\").effect(\"Text Justification\")(\"Menu\").value}catch(err){select = 0};\
+try{enable = thisComp.layer(\"_Font Buddy\").effect(\"Show Selected\")(\"Checkbox\")}catch(err){enable = 1};\
+switch(select * enable){\
+	case 0: value;\
+	break;\
+	case 1: value;\
+	break;\
+	case 2: 0;\
+	break;\
+	case 3: 0;\
+	break\
+} ";
 
+var centerTextOpacityExpression = "try{select = thisComp.layer(\"_Font Buddy\").effect(\"Text Justification\")(\"Menu\").value}catch(err){select = 0};\
+try{enable = thisComp.layer(\"_Font Buddy\").effect(\"Show Selected\")(\"Checkbox\")}catch(err){enable = 1};\
+switch(select * enable){\
+	case 0: value;\
+	break;\
+	case 1: 0;\
+	break;\
+	case 2: value;\
+	break;\
+	case 3: 0;\
+	break\
+} ";
 
-
+var rightTextOpacityExpression = "try{select = thisComp.layer(\"_Font Buddy\").effect(\"Text Justification\")(\"Menu\").value}catch(err){select = 0};\
+try{enable = thisComp.layer(\"_Font Buddy\").effect(\"Show Selected\")(\"Checkbox\")}catch(err){enable = 1};\
+switch(select * enable){\
+	case 0: value;\
+	break;\
+	case 1: 0;\
+	break;\
+	case 2: 0;\
+	break;\
+	case 3: value;\
+	break\
+} ";
 
 
 
