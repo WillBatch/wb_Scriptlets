@@ -1,5 +1,6 @@
 $.evalFile("src/expressions.jsx");
-$.evalFile("src/imagebinaries.jsx");
+// $.evalFile("src/imagebinaries.jsx");
+
 
 //Get psuedo effect file
 // first get the Folder Path
@@ -13,205 +14,205 @@ null;
 };
 
 
-var alignButtonSize = [20,20];
+// var alignButtonSize = [20,20];
 
-//ICONS - Buttons Top Row
-var newFontBuddyButton = {a:File("./img/newFontBuddy_default.png"), b:File("./img/newFontBuddy_hover.png"), c:File("./img/newFontBuddy_hover.png"), d:File("./img/newFontBuddy_hover.png")}
-var scriptIconsNewFontBuddy = ScriptUI.newImage(newFontBuddyButton.a, newFontBuddyButton.b, newFontBuddyButton.c, newFontBuddyButton.d);
-var refreshFontBuddyButton = {a:File("./img/refreshFontBuddy_default.png"), b:File("./img/refreshFontBuddy_hover.png"), c:File("./img/refreshFontBuddy_hover.png"), d:File("./img/refreshFontBuddy_hover.png")}
-var scriptIconsRefreshFontBuddy = ScriptUI.newImage(refreshFontBuddyButton.a, refreshFontBuddyButton.b, refreshFontBuddyButton.c, refreshFontBuddyButton.d);
-var newTextControlLayersButton = {a:File("./img/newTextControlLayers_default.png"), b:File("./img/newTextControlLayers_hover.png"), c:File("./img/newTextControlLayers_hover.png"), d:File("./img/newTextControlLayers_hover.png")}
-var scriptIconsnewTextControlLayers = ScriptUI.newImage(newTextControlLayersButton.a, newTextControlLayersButton.b, newTextControlLayersButton.c, newTextControlLayersButton.d);
-var newLinkToFontBuddyImg = {a:File("./img/newFontBuddyLink_default.png"), b:File("./img/newFontBuddyLink_hover.png"), c:File("./img/newFontBuddyLink_hover.png"), d:File("./img/newFontBuddyLink_hover.png")}
-var newLinkToFontBuddyButtonArray = ScriptUI.newImage(newLinkToFontBuddyImg.a, newLinkToFontBuddyImg.b, newLinkToFontBuddyImg.c, newLinkToFontBuddyImg.d);
+// //ICONS - Buttons Top Row
+// var newFontBuddyButton = {a:File("./img/newFontBuddy_default.png"), b:File("./img/newFontBuddy_hover.png"), c:File("./img/newFontBuddy_hover.png"), d:File("./img/newFontBuddy_hover.png")}
+// var scriptIconsNewFontBuddy = ScriptUI.newImage(newFontBuddyButton.a, newFontBuddyButton.b, newFontBuddyButton.c, newFontBuddyButton.d);
+// var refreshFontBuddyButton = {a:File("./img/refreshFontBuddy_default.png"), b:File("./img/refreshFontBuddy_hover.png"), c:File("./img/refreshFontBuddy_hover.png"), d:File("./img/refreshFontBuddy_hover.png")}
+// var scriptIconsRefreshFontBuddy = ScriptUI.newImage(refreshFontBuddyButton.a, refreshFontBuddyButton.b, refreshFontBuddyButton.c, refreshFontBuddyButton.d);
+// var newTextControlLayersButton = {a:File("./img/newTextControlLayers_default.png"), b:File("./img/newTextControlLayers_hover.png"), c:File("./img/newTextControlLayers_hover.png"), d:File("./img/newTextControlLayers_hover.png")}
+// var scriptIconsnewTextControlLayers = ScriptUI.newImage(newTextControlLayersButton.a, newTextControlLayersButton.b, newTextControlLayersButton.c, newTextControlLayersButton.d);
+// var newLinkToFontBuddyImg = {a:File("./img/newFontBuddyLink_default.png"), b:File("./img/newFontBuddyLink_hover.png"), c:File("./img/newFontBuddyLink_hover.png"), d:File("./img/newFontBuddyLink_hover.png")}
+// var newLinkToFontBuddyButtonArray = ScriptUI.newImage(newLinkToFontBuddyImg.a, newLinkToFontBuddyImg.b, newLinkToFontBuddyImg.c, newLinkToFontBuddyImg.d);
 
-// ICONS - Align
-var iconsLeftAlign = {a:File("./img/alignLeft_default.png"), b:File("./img/alignLeft_default.png"), c:File("./img/alignLeft_enable.png"), d:File("./img/alignLeft_enable.png")}
-var scriptIconsLeftAlign = ScriptUI.newImage(iconsLeftAlign.a, iconsLeftAlign.b, iconsLeftAlign.c, iconsLeftAlign.d);
-var iconsCenterAlign = {a:File("./img/alignCenter_default.png"), b:File("./img/alignCenter_default.png"), c:File("./img/alignCenter_enable.png"), d:File("./img/alignCenter_enable.png")}
-var scriptIconsCenterAlign = ScriptUI.newImage(iconsCenterAlign.a, iconsCenterAlign.b, iconsCenterAlign.c, iconsCenterAlign.d);
-var iconsRightAlign = {a:File("./img/alignRight_default.png"), b:File("./img/alignRight_default.png"), c:File("./img/alignRight_enable.png"), d:File("./img/alignRight_enable.png")}
-var scriptIconsRightAlign = ScriptUI.newImage(iconsRightAlign.a, iconsRightAlign.b, iconsRightAlign.c, iconsRightAlign.d);
-
-
-//Building the UI
-var mainWindow = new Window("palette", "Font Buddy", undefined);
-// mainWindow.orientation = "column";
+// // ICONS - Align
+// var iconsLeftAlign = {a:File("./img/alignLeft_default.png"), b:File("./img/alignLeft_default.png"), c:File("./img/alignLeft_enable.png"), d:File("./img/alignLeft_enable.png")}
+// var scriptIconsLeftAlign = ScriptUI.newImage(iconsLeftAlign.a, iconsLeftAlign.b, iconsLeftAlign.c, iconsLeftAlign.d);
+// var iconsCenterAlign = {a:File("./img/alignCenter_default.png"), b:File("./img/alignCenter_default.png"), c:File("./img/alignCenter_enable.png"), d:File("./img/alignCenter_enable.png")}
+// var scriptIconsCenterAlign = ScriptUI.newImage(iconsCenterAlign.a, iconsCenterAlign.b, iconsCenterAlign.c, iconsCenterAlign.d);
+// var iconsRightAlign = {a:File("./img/alignRight_default.png"), b:File("./img/alignRight_default.png"), c:File("./img/alignRight_enable.png"), d:File("./img/alignRight_enable.png")}
+// var scriptIconsRightAlign = ScriptUI.newImage(iconsRightAlign.a, iconsRightAlign.b, iconsRightAlign.c, iconsRightAlign.d);
 
 
-var imageGroup = mainWindow.add("group", undefined, "imageGroup");
-imageGroup.orientation = "row"
-var listBox = imageGroup.add("listbox", undefined, []);
-listBox.selection = 0;
-listBox.size = [140, 120];
-var newFontBuddy = imageGroup.add("iconbutton", undefined, scriptIconsNewFontBuddy,{style:"toolbutton"});
-newFontBuddy.size = [20,20];
-newFontBuddy.helpTip = "Create a new Font Buddy composition";
-var refreshFontBuddy = imageGroup.add("iconbutton", undefined, scriptIconsRefreshFontBuddy,{style:"toolbutton"});
-refreshFontBuddy.size = [20,20];
-refreshFontBuddy.helpTip = "Refresh";
-var newTextControlLayers = imageGroup.add("iconbutton", undefined, scriptIconsnewTextControlLayers,{style:"toolbutton"});
-newTextControlLayers.size = [100,31];
-var newLinkToFontBuddyButton = imageGroup.add("iconbutton", undefined, newLinkToFontBuddyButtonArray,{style:"toolbutton"});
-newLinkToFontBuddyButton.size = [100,31];
+// //Building the UI
+// var mainWindow = new Window("palette", "Font Buddy", undefined);
+// // mainWindow.orientation = "column";
 
-var imageGroupTwo = mainWindow.add("group", undefined, "imageGroup");
-imageGroupTwo.orientation = "row"
-var addtext = imageGroupTwo.add("button", undefined, "Add Text");
-addtext.size = [70,20];
-var unlink = imageGroupTwo.add("button", undefined, "Bake Font");
-unlink.size = [70,20];
-var relink = imageGroupTwo.add("button", undefined, "Link");
-relink.size = [70,20];
-var fbcompbutton = imageGroupTwo.add("button", undefined, "InsertFBCOMP");
-fbcompbutton.size = [70,20];
-// fbcompbutton.value = 1;
-fbcompbutton.helpTip = "Adds Font Buddy to Comp";
-var updatedropdownsButton = imageGroupTwo.add("button", undefined, "Update");
-updatedropdownsButton.size = [70,20];
-// fbcompbutton.value = 1;
-updatedropdownsButton.helpTip = "Updates Controllers if changes are made to Font Buddy comp";
-var copyAnimatorPropertiesButton = imageGroupTwo.add("button", undefined, "Copy Animator Props");
 
-var statictext = imageGroup.add("statictext", undefined, "");
+// var imageGroup = mainWindow.add("group", undefined, "imageGroup");
+// imageGroup.orientation = "row"
+// var ListBox = imageGroup.add("ListBox", undefined, []);
+// ListBox.selection = 0;
+// ListBox.size = [140, 120];
+// var newFontBuddy = imageGroup.add("iconbutton", undefined, scriptIconsNewFontBuddy,{style:"toolbutton"});
+// newFontBuddy.size = [20,20];
+// newFontBuddy.helpTip = "Create a new Font Buddy composition";
+// var refreshFontBuddy = imageGroup.add("iconbutton", undefined, scriptIconsRefreshFontBuddy,{style:"toolbutton"});
+// refreshFontBuddy.size = [20,20];
+// refreshFontBuddy.helpTip = "Refresh";
+// var newTextControlLayers = imageGroup.add("iconbutton", undefined, scriptIconsnewTextControlLayers,{style:"toolbutton"});
+// newTextControlLayers.size = [100,31];
+// var newLinkToFontBuddyButton = imageGroup.add("iconbutton", undefined, newLinkToFontBuddyButtonArray,{style:"toolbutton"});
+// newLinkToFontBuddyButton.size = [100,31];
 
-var groupThree = mainWindow.add("group", undefined, groupThree);
-groupThree.orientation = "row";
-var iconLeftAlignButton = groupThree.add("iconbutton", undefined, scriptIconsLeftAlign,{style:"toolbutton", toggle:true});
-iconLeftAlignButton.size = alignButtonSize;
-iconLeftAlignButton.value = 1;
-var iconCenterAlignButton = groupThree.add("iconbutton", undefined, scriptIconsCenterAlign,{style:"toolbutton", toggle:true});
-iconCenterAlignButton.size = alignButtonSize;
-iconCenterAlignButton.value = 0;
-var iconRightAlignButton = groupThree.add("iconbutton", undefined, scriptIconsRightAlign,{style:"toolbutton", toggle:true});
-iconRightAlignButton.size = alignButtonSize;
-iconRightAlignButton.value = 0;
+// var imageGroupTwo = mainWindow.add("group", undefined, "imageGroup");
+// imageGroupTwo.orientation = "row"
+// var addtext = imageGroupTwo.add("button", undefined, "Add Text");
+// addtext.size = [70,20];
+// var unlink = imageGroupTwo.add("button", undefined, "Bake Font");
+// unlink.size = [70,20];
+// var relink = imageGroupTwo.add("button", undefined, "Link");
+// relink.size = [70,20];
+// var fbcompbutton = imageGroupTwo.add("button", undefined, "InsertFBCOMP");
+// fbcompbutton.size = [70,20];
+// // fbcompbutton.value = 1;
+// fbcompbutton.helpTip = "Adds Font Buddy to Comp";
+// var updatedropdownsButton = imageGroupTwo.add("button", undefined, "Update");
+// updatedropdownsButton.size = [70,20];
+// // fbcompbutton.value = 1;
+// updatedropdownsButton.helpTip = "Updates Controllers if changes are made to Font Buddy comp";
+// var copyAnimatorPropertiesButton = imageGroupTwo.add("button", undefined, "Copy Animator Props");
 
-var closeButton = groupThree.add("button", undefined, "Close");
+// var statictext = imageGroup.add("statictext", undefined, "");
 
-var groupFour = mainWindow.add("group", undefined, groupFour);
-groupFour.orientation = "row";
-var propsToPsuedoButton = groupFour.add("button", undefined, "Psuedo Props");
-var renameTextControllersButton = groupFour.add("button", undefined, "Rename Controllers");
-var connectTextToControlLayerButton = groupFour.add("button", undefined, "Connect Text To Controller");
-var convertTextToControllerButton = groupFour.add("button", undefined, "Convert Text To Controller");
-var copyTextPropsButton = groupFour.add("button", undefined, "Copy Props");
-var pasteTextPropsButton = groupFour.add("button", undefined, "Paste");
-var radio1 = groupFour.add("radiobutton", undefined, "All Properties");
-var radio2 = groupFour.add("radiobutton", undefined, "Font Only");
-radio1.value = true;
+// var groupThree = mainWindow.add("group", undefined, groupThree);
+// groupThree.orientation = "row";
+// var iconLeftAlignButton = groupThree.add("iconbutton", undefined, scriptIconsLeftAlign,{style:"toolbutton", toggle:true});
+// iconLeftAlignButton.size = alignButtonSize;
+// iconLeftAlignButton.value = 1;
+// var iconCenterAlignButton = groupThree.add("iconbutton", undefined, scriptIconsCenterAlign,{style:"toolbutton", toggle:true});
+// iconCenterAlignButton.size = alignButtonSize;
+// iconCenterAlignButton.value = 0;
+// var iconRightAlignButton = groupThree.add("iconbutton", undefined, scriptIconsRightAlign,{style:"toolbutton", toggle:true});
+// iconRightAlignButton.size = alignButtonSize;
+// iconRightAlignButton.value = 0;
+
+// var closeButton = groupThree.add("button", undefined, "Close");
+
+// var groupFour = mainWindow.add("group", undefined, groupFour);
+// groupFour.orientation = "row";
+// var propsToPsuedoButton = groupFour.add("button", undefined, "Psuedo Props");
+// var renameTextControllersButton = groupFour.add("button", undefined, "Rename Controllers");
+// var connectTextToControlLayerButton = groupFour.add("button", undefined, "Connect Text To Controller");
+// var convertTextToControllerButton = groupFour.add("button", undefined, "Convert Text To Controller");
+// var copyTextPropsButton = groupFour.add("button", undefined, "Copy Props");
+// var pasteTextPropsButton = groupFour.add("button", undefined, "Paste");
+// var radio1 = groupFour.add("radiobutton", undefined, "All Properties");
+// var radio2 = groupFour.add("radiobutton", undefined, "Font Only");
+// radio1.value = true;
 
 // mainWindow.center();
 // mainWindow.show();
 
 //Button Functions
-newFontBuddy.onClick = function(){
+// newFontBuddy.onClick = function(){
             
-      var fontBuddyComp = checkFontBuddyComp();
-      fontBuddyComp != undefined ? null() : addFontBuddyCompAndFolder();
+//       var fontBuddyComp = checkFontBuddyComp();
+//       fontBuddyComp != undefined ? null() : addFontBuddyCompAndFolder();
 
 
 
-}
-refreshFontBuddy.onClick = function(){
+// }
+// refreshFontBuddy.onClick = function(){
     
-    refreshListItemBoxContents();
+//     refreshListItemBoxContents();
 
-}
-listBox.onDoubleClick = function () {
-    var fontbuddycomp = getFontBuddyComp();
-    var textlayer = this.selection.text;
-    var selLayers = [];
-    fontbuddycomp.openInViewer();
-    if(fontbuddycomp.layer(textlayer)!= undefined){
-        for(var i = 0; i < fontbuddycomp.selectedLayers.length; i++){
-            selLayers.push(fontbuddycomp.selectedLayers[i]);
-        }
-        for(var n = 0; n < selLayers.length; n++){
-            selLayers[n].selected = false;
-        }
-        fontbuddycomp.layer(textlayer).selected = true;
-    }
+// }
+// ListBox.onDoubleClick = function () {
+//     var fontbuddycomp = getFontBuddyComp();
+//     var textlayer = this.selection.text;
+//     var selLayers = [];
+//     fontbuddycomp.openInViewer();
+//     if(fontbuddycomp.layer(textlayer)!= undefined){
+//         for(var i = 0; i < fontbuddycomp.selectedLayers.length; i++){
+//             selLayers.push(fontbuddycomp.selectedLayers[i]);
+//         }
+//         for(var n = 0; n < selLayers.length; n++){
+//             selLayers[n].selected = false;
+//         }
+//         fontbuddycomp.layer(textlayer).selected = true;
+//     }
     
-}
-newTextControlLayers.onClick = function(){
-    app.beginUndoGroup("Add Text Control Layers");
-    var curComp = proj.activeItem;
-    if(curComp.name != fbCompName){
-    var comp = getFontBuddyComp();
-    createTextControllers(comp, curComp);
-    app.endUndoGroup();
-    }else{
-        alert("Can't add control layers to Font Buddy Comp!");
-    }
+// }
+// newTextControlLayers.onClick = function(){
+//     app.beginUndoGroup("Add Text Control Layers");
+//     var curComp = proj.activeItem;
+//     if(curComp.name != fbCompName){
+//     var comp = getFontBuddyComp();
+//     createTextControllers(comp, curComp);
+//     app.endUndoGroup();
+//     }else{
+//         alert("Can't add control layers to Font Buddy Comp!");
+//     }
 
-}
-addtext.onClick = function(){
-    var curComp = proj.activeItem;
-    app.beginUndoGroup("add text layers linked to controllers");
-    addTextLayersLinkedToControllers(curComp);
-    app.endUndoGroup();
-}
-unlink.onClick = function(){
-    //alert();
-    var curComp = proj.activeItem;
-    app.beginUndoGroup("");
-    unlinkTextControllers(curComp);
-    app.endUndoGroup();
-}
-relink.onClick = function(){
-    //alert();
-    var curComp = proj.activeItem;
-    app.beginUndoGroup("relink");
-    relinkTextControllers(curComp);
-    app.endUndoGroup();
-}
-closeButton.onClick = function() {
-    mainWindow.hide();
-}
-fbcompbutton.onClick = function(){
+// }
+// addtext.onClick = function(){
+//     var curComp = proj.activeItem;
+//     app.beginUndoGroup("add text layers linked to controllers");
+//     addTextLayersLinkedToControllers(curComp);
+//     app.endUndoGroup();
+// }
+// unlink.onClick = function(){
+//     //alert();
+//     var curComp = proj.activeItem;
+//     app.beginUndoGroup("");
+//     unlinkTextControllers(curComp);
+//     app.endUndoGroup();
+// }
+// relink.onClick = function(){
+//     //alert();
+//     var curComp = proj.activeItem;
+//     app.beginUndoGroup("relink");
+//     relinkTextControllers(curComp);
+//     app.endUndoGroup();
+// }
+// closeButton.onClick = function() {
+//     mainWindow.hide();
+// }
+// fbcompbutton.onClick = function(){
     
-    addFontBuddyCompToComp(proj.activeItem, getFontBuddyComp());
+//     addFontBuddyCompToComp(proj.activeItem, getFontBuddyComp());
     
-}
-updatedropdownsButton.onClick = function(){
-    app.beginUndoGroup("update");
-    updateDropDownsOnControllers(proj.activeItem, getFontBuddyComp());
-    app.endUndoGroup();
-}
-propsToPsuedoButton.onClick = function(){
-    // var comp = getFontBuddyComp();
-    // var layers = getFontBuddyLayerNames(comp);
-    convertTextPropsToPsuedoEffect(proj.activeItem);
+// }
+// updatedropdownsButton.onClick = function(){
+//     app.beginUndoGroup("update");
+//     updateDropDownsOnControllers(proj.activeItem, getFontBuddyComp());
+//     app.endUndoGroup();
+// }
+// propsToPsuedoButton.onClick = function(){
+//     // var comp = getFontBuddyComp();
+//     // var layers = getFontBuddyLayerNames(comp);
+//     convertTextPropsToPsuedoEffect(proj.activeItem);
     
-    // addIndexSliderForFontBuddyComp(comp, layers);
-}
-renameTextControllersButton.onClick = function(){
-    renameTextControllers(proj.activeItem);
-}
-connectTextToControlLayerButton.onClick = function(){
-    app.beginUndoGroup("Connect Text To Control");
-    connectTextToControlLayer(proj.activeItem);
-    app.endUndoGroup();
-}
-copyTextPropsButton.onClick = function(){
-    copy(proj.activeItem);
-}
-pasteTextPropsButton.onClick = function(){
-    app.beginUndoGroup("Paste Text Props");
-    paste(proj.activeItem);
-    app.endUndoGroup();
-}
-convertTextToControllerButton.onClick = function(){
-    app.beginUndoGroup("Convert Text To Controller");
-    convertTextToController(proj.activeItem);
-    app.endUndoGroup();
-}
-copyAnimatorPropertiesButton.onClick = function(){
-    app.beginUndoGroup("Copy Animator Props");
-    copyAnimatorProperties(proj.activeItem);
-    app.endUndoGroup();
-}
+//     // addIndexSliderForFontBuddyComp(comp, layers);
+// }
+// renameTextControllersButton.onClick = function(){
+//     renameTextControllers(proj.activeItem);
+// }
+// connectTextToControlLayerButton.onClick = function(){
+//     app.beginUndoGroup("Connect Text To Control");
+//     connectTextToControlLayer(proj.activeItem);
+//     app.endUndoGroup();
+// }
+// copyTextPropsButton.onClick = function(){
+//     copy(proj.activeItem);
+// }
+// pasteTextPropsButton.onClick = function(){
+//     app.beginUndoGroup("Paste Text Props");
+//     paste(proj.activeItem);
+//     app.endUndoGroup();
+// }
+// convertTextToControllerButton.onClick = function(){
+//     app.beginUndoGroup("Convert Text To Controller");
+//     convertTextToController(proj.activeItem);
+//     app.endUndoGroup();
+// }
+// copyAnimatorPropertiesButton.onClick = function(){
+//     app.beginUndoGroup("Copy Animator Props");
+//     copyAnimatorProperties(proj.activeItem);
+//     app.endUndoGroup();
+// }
 
 //Globals
 var proj = app.project;
@@ -221,7 +222,6 @@ var numberOfTextLayers = 4;
 var textNames = ["Title-Font 1", "Title-Font 2", "Body-Font 1", "Body-Font 2"];
 var commentName = "Font Buddy Control Layer";
 
-//var numberOfTextLayers = editNames.text.split(",").length;
 
 if(getFontBuddyComp() != undefined){
     refreshListItemBoxContents()
@@ -278,20 +278,20 @@ function paste(curComp){
 function createTextControllers(comp, curComp){
     
     //checks for list items. if none, will refresh first
-    if(listBox.items.length == 0){
+    if(ListBox.items.length == 0){
         refreshListItemBoxContents();
     }
     //converts listitems into string array
-    var textNames = listBoxItemString();
+    var textNames = ListBoxItemString();
 
     //Gets selection from drown down. If none, forces the first one
-    if(listBox.selection != null){
+    if(ListBox.selection != null){
     
-        var listSelection = listBox.selection.index;
+        var listSelection = ListBox.selection.index;
         // alert(textNames[listSelection]);
     }else{
         
-        var listSelection = listBox.selection = [0];
+        var listSelection = ListBox.selection = [0];
         // alert(textNames[listSelection]);
     }
     //Adds and formats ONE text controller
@@ -440,8 +440,8 @@ function linkToFontBuddyDropDown(select, activeLayer){
     
     //converts listitems into string array for drop down menu
     var layerArray = [];
-    for(var i = 0; i < listBox.items.length; i++){
-        layerArray.push(listBox.items[i].text.toString());
+    for(var i = 0; i < ListBox.items.length; i++){
+        layerArray.push(ListBox.items[i].text.toString());
     }
     //Adds drop down effect
         var boxLayerDropdown = activeLayer.Effects.addProperty("ADBE Dropdown Control");
@@ -543,7 +543,7 @@ function addTextLayersLinkedToControllers(curComp){
 //unlinks a text controller from FontBuddy Comp and removes dropdown effect and expression
 function unlinkTextControllers(curComp){
     refreshListItemBoxContents();
-    var dropdownstring = listBoxItemString();
+    var dropdownstring = ListBoxItemString();
 
     for(var i = 0; i < curComp.selectedLayers.length; i ++){
         var activelayer = curComp.selectedLayers[i];
@@ -570,26 +570,26 @@ function unlinkTextControllers(curComp){
 
        
 }
-//relinks a text controller to a different listbox item
+//relinks a text controller to a different ListBox item
 function relinkTextControllers(curComp){
-    //Relinks selected controller layer to selected listbox item selection
+    //Relinks selected controller layer to selected ListBox item selection
 
     //Checks for existing drop down controller. If found, will update it.
 
     //Gets selection from drown down. If none, forces the first one
-    if(listBox.selection != null){
+    if(ListBox.selection != null){
 
-        var listSelection = listBox.selection.index;
+        var listSelection = ListBox.selection.index;
         // alert(textNames[listSelection]);
     }else{
         
-        var listSelection = listBox.selection = [0];
+        var listSelection = ListBox.selection = [0];
         // alert(textNames[listSelection]);
     }
 
         //converts listitems into string array for drop down menu
         refreshListItemBoxContents();
-        var styles = listBoxItemString();
+        var styles = ListBoxItemString();
 
         for(var a = 0; a < curComp.selectedLayers.length; a ++){
             //Builds array of all selected Layers
@@ -696,8 +696,8 @@ function updateDropDownsOnControllers(curComp){
     //converts listitems into string array for drop down menu
     var styles = [];
 
-        for(var i = 0; i < listBox.items.length; i++){
-        styles.push(listBox.items[i].text.toString());
+        for(var i = 0; i < ListBox.items.length; i++){
+        styles.push(ListBox.items[i].text.toString());
     }
     
     //Find all text layers with drop down effect and refreshes effect
@@ -706,8 +706,8 @@ function updateDropDownsOnControllers(curComp){
         if((curComp.layer(n) instanceof TextLayer) && curComp.layer(n).property("Effects").property("Link-To-Font-Buddy") != undefined){
            var l = curComp.layer(n);
            var oldValue = l.property("Effects").property("Link-To-Font-Buddy").property("Menu").value;
-           if(listBox.items[oldValue - 1] != undefined){
-                var oldListBoxItemName = listBox.items[oldValue - 1];
+           if(ListBox.items[oldValue - 1] != undefined){
+                var oldListBoxItemName = ListBox.items[oldValue - 1];
            }else{
                 var oldListBoxItemName = "null";
            }
@@ -715,7 +715,7 @@ function updateDropDownsOnControllers(curComp){
            for(var a = 0; a < styles.length; a++){
             if(styles[a] == oldListBoxItemName.toString()){
 
-                var newValue = listBox.items[a].index + 1;
+                var newValue = ListBox.items[a].index + 1;
                 break;
                 
             }else{
@@ -739,12 +739,12 @@ function refreshListItemBoxContents(){
     var fontbuddycomp = getFontBuddyComp();
     //removes all items first
     
-    // alert(listboxitems[1]);
-    if(listBox.items.length != 0){
-        // var listboxitems = listBox.items;
-        for(n = listBox.items.length - 1; n >= 0; n--){
-            // alert(listBox.items[n]);
-            listBox.remove(listBox.items[n]);
+    // alert(ListBoxitems[1]);
+    if(ListBox.items.length != 0){
+        // var ListBoxitems = ListBox.items;
+        for(n = ListBox.items.length - 1; n >= 0; n--){
+            // alert(ListBox.items[n]);
+            ListBox.remove(ListBox.items[n]);
         }
     }
        
@@ -752,7 +752,7 @@ function refreshListItemBoxContents(){
     for(var i = 1; i <= fontbuddycomp.numLayers; i++){
         var t = fontbuddycomp.layer(i).name;
         
-        listBox.add("item", t);
+        ListBox.add("item", t);
     }
         
     
@@ -760,11 +760,11 @@ function refreshListItemBoxContents(){
 
 }
 //converts listitems into string array for drop down menu
-function listBoxItemString(){
+function ListBoxItemString(){
         var styles = [];
 
-        for(var i = 0; i < listBox.items.length; i++){
-        styles.push(listBox.items[i].text.toString());
+        for(var i = 0; i < ListBox.items.length; i++){
+        styles.push(ListBox.items[i].text.toString());
     }
     return styles
 }
@@ -875,7 +875,7 @@ function copyAndPasteTextProps(layer, comp){
 function renameTextControllers(curComp){
     //converts listitems into string array for drop down menu
     refreshListItemBoxContents();
-    var dropdownstring = listBoxItemString();
+    var dropdownstring = ListBoxItemString();
     app.beginUndoGroup("rename text controllers");
     for(var i = 0; i < curComp.selectedLayers.length; i ++){
         var activelayer = curComp.selectedLayers[i];
@@ -950,19 +950,19 @@ function convertTextToController(curComp){
         if(check.length < 1){
             var text = curComp.layer(selLayer.index);
             //checks for list items. if none, will refresh first
-            if(listBox.items.length == 0){
+            if(ListBox.items.length == 0){
                 refreshListItemBoxContents();
             }
             //converts listitems into string array
-            var textNames = listBoxItemString();
+            var textNames = ListBoxItemString();
 
             //Gets selection from drown down. If none, forces the first one
-            if(listBox.selection != null){
+            if(ListBox.selection != null){
             
-                var listSelection = listBox.selection.index;
+                var listSelection = ListBox.selection.index;
             }else{
                 
-                var listSelection = listBox.selection = [0];
+                var listSelection = ListBox.selection = [0];
 
             }
             text.guideLayer = true;
