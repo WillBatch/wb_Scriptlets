@@ -108,10 +108,6 @@ var addTextControlButton = group1row2.add("iconbutton", undefined, File.decode(n
   addTextControlButton.size = group1row2buttonsize;
   var unlinkButton = group1row2.add("iconbutton", undefined, File.decode(unlink_d), {name: "unlinkbutton", style: "toolbutton"}); 
   unlinkButton.size = group1row2buttonsize;
-
-// var ListBox_array = ["Item"]; 
-// var listBox = subGroup1.add("listbox", undefined, []);  
-
 var listBox = subGroup1.add("listbox", [0,0,120,80], [], {multiselect: false});  
 
 var group2Buttons = mainGroup1.add("group", undefined, {name: "group2Buttons"}); 
@@ -144,6 +140,7 @@ var group1 = subGroup2.add("group", undefined, {name: "group1"});
 
 var addTextLayersButton = group1.add("iconbutton", undefined, File.decode(addTextLayers_d), {name: "addtext", style: "toolbutton"});
   addTextLayersButton.size = [85,22]; 
+  addTextLayersButton.helpTip = "Alt-Click to add standard text layer";
 
 // TEXTPARAGRAPH
 // =============
@@ -192,13 +189,7 @@ var group4 = group2.add("group", undefined, {name: "group4"});
   group4.spacing = 3; 
   group4.margins = 0; 
 
-var styleRadioButton = group4.add("radiobutton", undefined, undefined, {name: "styleRadioButton"}); 
-  styleRadioButton.text = "Style"; 
-  styleRadioButton.value = true; 
-
-var fontRadioButton = group4.add("radiobutton", undefined, undefined, {name: "fontRadioButton"}); 
-  fontRadioButton.text = "Font"; 
-var statictext = group4.add("statictext", undefined, "");
+var copiedTextContainer = group4.add("statictext", undefined, "");
 // GROUP5
 // ======
 var group5 = mainGroup1.add("group", undefined, {name: "group5"}); 
@@ -382,8 +373,14 @@ var randomizeOrderStaticText = RandomizeOrder.add("statictext", undefined, "Rand
 var randomizeOrderCheckbox = RandomizeOrder.add("checkbox", undefined, undefined, {name: "randomizeOrderCheckbox"}); 
 
 var randomSeedEditText = RandomizeOrder.add('edittext {properties: {name: "randomSeedEditText"}}'); 
-  randomSeedEditText.text = "12345"; 
-  randomSeedEditText.preferredSize.width = 50;
+  randomSeedEditText.text = "123"; 
+  randomSeedEditText.preferredSize.width = 40;
+
+  randomSeedEditText.onChanging = function(){limitCharacters(this,4);}
+
+  function limitCharacters(myInput,myLimit){
+  myInput.text = myInput.text.substr(0,myLimit);
+  }
 
 // GROUP2
 // ======
@@ -395,12 +392,16 @@ var group2 = tab2.add("group", undefined, {name: "group2"});
 
 var readAnimatorPropsButton = group2.add("button", undefined, undefined, {name: "readAnimatorProps"}); 
   readAnimatorPropsButton.text = "Read"; 
-var applyAnimatorButton = group2.add("button", undefined, undefined, {name: "applyAnimatorButton"}); 
-  applyAnimatorButton.text = "Apply"; 
+var updateAnimatorButton = group2.add("button", undefined, undefined, {name: "applyAnimatorButton"}); 
+  updateAnimatorButton.text = "Update"; 
 
 var animatorDropDown_array = ["Animator 1"]; 
 var animatorDropDown = group2.add("dropdownlist", undefined, undefined, {name: "animatorDropDown", items: animatorDropDown_array}); 
     animatorDropDown.selection = 0; 
+
+var rangeSelectorDropDown_array = ["Range Selector 1"]; 
+var rangeSelectorDropDown = group2.add("dropdownlist", undefined, undefined, {name: "rangeSelectorDropDown", items: rangeSelectorDropDown_array}); 
+rangeSelectorDropDown.selection = 0; 
 
 // TAB3
 // ====
@@ -453,8 +454,14 @@ if ( FontBuddy instanceof Window ) FontBuddy.show();
 //Button Functions
 newFontBuddyButton.onClick = function(){
             
-      var fontBuddyComp = checkFontBuddyComp();
-      fontBuddyComp != undefined ? null() : addFontBuddyCompAndFolder();
+      var fontBuddyComp = getFontBuddyComp();
+      if(fontBuddyComp == false ){
+        addFontBuddyCompAndFolder();
+        refreshListItemBoxContents();
+      }else{
+        replaceFontBuddyComp(fontBuddyComp);
+
+      } 
 
 }
 refreshListButton.onClick = function(){
@@ -490,12 +497,20 @@ addTextControlButton.onClick = function(){
     }
 
 }
+addTextLayersButton.addEventListener("keydown", alertKey);
 addTextLayersButton.onClick = function(){
-    alert("here");
     var curComp = proj.activeItem;
-    app.beginUndoGroup("add text layers linked to controllers");
-    addTextLayersLinkedToControllers(curComp);
-    app.endUndoGroup();
+    if(alertKey() == false){
+        app.beginUndoGroup("add text layers linked to controllers");
+        addTextLayersLinkedToControllers(curComp);
+        app.endUndoGroup();
+    }else{
+        app.beginUndoGroup("add text layer");
+        addBasicTextLayer(curComp);
+        app.endUndoGroup();
+    }
+
+
 }
 unlinkButton.onClick = function(){
     //alert();
@@ -517,12 +532,6 @@ insertFontBuddyButton.onClick = function(){
     
 }
 updateRenameButton.addEventListener("keydown", alertKey);
-function alertKey(){
-    var keyState = ScriptUI.environment.keyboardState;
-    if(keyState.altKey){
-        return true
-    }
-}
 updateRenameButton.onClick = function (){
     if(alertKey() == true){
         app.beginUndoGroup("rename");
@@ -546,9 +555,10 @@ connectButton.onClick = function(){
 copyButton.onClick = function(){
     copy(proj.activeItem);
 }
+pasteButton.addEventListener("keydown", alertKey);
 pasteButton.onClick = function(){
     app.beginUndoGroup("Paste Text Props");
-    paste(proj.activeItem);
+    paste(proj.activeItem, alertKey());
     app.endUndoGroup();
 }
 convertButton.onClick = function(){
@@ -556,10 +566,18 @@ convertButton.onClick = function(){
     convertTextToController(proj.activeItem);
     app.endUndoGroup();
 }
+copypasteanimatorButton.addEventListener("keydown", alertKey);
 copypasteanimatorButton.onClick = function(){
-    app.beginUndoGroup("Copy Animator Props");
-    copyAnimatorProperties(proj.activeItem);
-    app.endUndoGroup();
+    if(alertKey() == false){
+        app.beginUndoGroup("Copy Animator Props");
+        copyAnimatorPropertiesTextControllers(proj.activeItem);
+        app.endUndoGroup();
+    }else{
+        app.beginUndoGroup("Copy Animator Props");
+        copyAnimatorPropertiesFirstSelected(proj.activeItem);
+        app.endUndoGroup();
+    }
+
 }
 keyframeOffsetButton.onClick = function(){
 
@@ -567,10 +585,48 @@ keyframeOffsetButton.onClick = function(){
     createAnimatorAndKeyframeOffset(proj.activeItem);
     app.endUndoGroup();
 }
-readAnimatorPropsButton.onClick = function(){
-    app.beginUndoGroup("read animator props");
-    readAnimatorProps(proj.activeItem);
+updateAnimatorButton.onClick = function(){
+    app.beginUndoGroup("Update animator properties");
+    updateAnimatorProps(proj.activeItem);
     app.endUndoGroup();
+}
+
+animatorDropDown.addEventListener("change", animatorOnChangeFunction);
+function animatorOnChangeFunction(){
+    rangeSelectorDropDown.removeEventListener("change", rangeOnChangeFunction);
+    buildRangeSelectorDropDown(animatorDropDown.selection.index, getSelectedLayerAnimatorProperty(proj.activeItem));
+    displayAnimatorProps(proj.activeItem, animatorDropDown.selection.index, rangeSelectorDropDown.selection.index);
+    rangeSelectorDropDown.addEventListener("change", rangeOnChangeFunction);
+}
+rangeSelectorDropDown.addEventListener("change",rangeOnChangeFunction);
+function rangeOnChangeFunction(){
+    displayAnimatorProps(proj.activeItem, animatorDropDown.selection.index, rangeSelectorDropDown.selection.index);
+}
+
+readAnimatorPropsButton.onClick = function(){
+    //Temporarily disable the onChange event listener when the dropdown items update
+    animatorDropDown.removeEventListener("change", animatorOnChangeFunction);
+    rangeSelectorDropDown.removeEventListener("change", rangeOnChangeFunction);
+
+    app.beginUndoGroup("read animator props");
+    readAnimatorProps(proj.activeItem, animatorDropDown.selection.index, true, rangeSelectorDropDown.selection.index);
+    displayAnimatorProps(proj.activeItem, animatorDropDown.selection.index, rangeSelectorDropDown.selection.index);
+    app.endUndoGroup();
+    //Enables the onChange again
+    animatorDropDown.addEventListener("change", animatorOnChangeFunction);
+    rangeSelectorDropDown.addEventListener("change", rangeOnChangeFunction);
+
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//Event Listener Functions
+function alertKey(){
+    var keyState = ScriptUI.environment.keyboardState;
+    if(keyState.altKey){
+        return true
+    }else{
+        return false
+    }
 }
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //FUNCTIONS
@@ -588,7 +644,7 @@ var textNames = ["Title-Font 1", "Title-Font 2", "Body-Font 1", "Body-Font 2"];
 var commentName = "Font Buddy Control Layer";
 
 
-if(getFontBuddyComp() != undefined){
+if(getFontBuddyComp() != false){
     refreshListItemBoxContents()
 }
 
@@ -604,11 +660,12 @@ try{
 
 function copy(curComp){
     var a = curComp.selectedLayers[0].name;
-    statictext.text = a;
+    copiedTextContainer.text = a;
 
 }
-function paste(curComp){
-    var copiedLayer = curComp.layer(statictext.text);
+function paste(curComp, alt){
+
+    var copiedLayer = curComp.layer(copiedTextContainer.text);
 
     
     for(var i = 0; i < curComp.selectedLayers.length; i++){
@@ -618,7 +675,7 @@ function paste(curComp){
         var pasteLayerProps = pasteLayer.property("Source Text");
         var pasteLayerString = pasteLayerProps.value.text;
 
-            if(styleRadioButton.value == true){
+            if(alt == false){
                 var copiedLayerProps = copiedLayer.property("Source Text").value;
                 //pastes all properties
                 pasteLayerProps.setValue(copiedLayerProps);
@@ -684,27 +741,23 @@ function createTextControllers(comp, curComp){
         sourceText.expression = linkControllersToDropDown;
         var width = text.sourceRectAtTime(0, false).width.toFixed(0);
 
-        text.property("Transform").property("Position").setValue([curComp.width/2 - width / 2, curComp.height/2 - 300, 0]);
-
-
         //Adjust position to add controllers underneath the y position of the lowest controller
         var allTextControllers = getAllTextControllers(curComp);
-        if(allTextControllers.length > 1){
-        var controllerPositions = [];
-        for(var i = 0; i < allTextControllers.length; i++){
-            controllerPositions.push(curComp.layer(allTextControllers[i]).property("Transform").property("Position").value[1]);
-        }
-        var yMaxPos = controllerPositions.reduce(function (a, b) {
-                return Math.max(a, b);
-                    }, -Infinity);
-        text.property("Transform").property("Position").setValue([curComp.width/2 - width/2, yMaxPos + 100, 0]);
-        }
+            for(var i = 0; i < allTextControllers.length; i++){
+                var yNudge = i * 100;   
+            }
+
+            // var yMaxPos = controllerPositions.reduce(function (a, b) {
+            //         return Math.max(a, b);
+            //             }, -Infinity);
+        text.property("Transform").property("Position").setValue([curComp.width/2 - width/2, curComp.height/2 - 300 + yNudge, 0]);
+        
 
         
 
 }
+//Adds font buddy comp and folder to project
 function addFontBuddyCompAndFolder(){
-
     //checks for active comp and adds one if not active
 
     //checks for folder
@@ -715,17 +768,20 @@ function addFontBuddyCompAndFolder(){
             var folderExists = true;
             var folder = proj.item(n);
             break        
+        }else{
+            continue
         }
     }
     //adds folder
+    app.beginUndoGroup("Add font buddy folder");
+
     if(folderExists != true){
-    var folder = proj.items.addFolder(fbFolderName);
+        var folder = proj.items.addFolder(fbFolderName);
     }
 
     //adds composition
     var comp = proj.items.addComp(compProps[0], compProps[1], compProps[2], compProps[3], compProps[4], compProps[5]);
     comp.parentFolder = folder;
-
     //creates text layers
     for(var i = 1; i<=numberOfTextLayers; i++){
         var textLayer = comp.layers.addText(textNames[i-1]);
@@ -745,34 +801,26 @@ function addFontBuddyCompAndFolder(){
         }
 
     }
-
+    app.endUndoGroup();
     //adds fontbuddy comp to current composition
-    addFontBuddyCompToComp();
-    refreshListItemBoxContents();
-
-
-    return comp;
-
-}
-function checkFontBuddyComp(){
-    var comp = false;
-    for(var i = 1; i<= proj.numItems; i++){
-        if(proj.item(i).name == fbCompName && proj.item(i) instanceof CompItem){
-            var comp = proj.item(i);
-            break
-        }
+    if((proj.activeItem != undefined) && (proj.activeItem.name != comp.name)){
+        addFontBuddyCompToComp();
     }
 
-    
-    if(comp == false){
-        var comp = addFontBuddyCompAndFolder();
-    }else{
+    return comp;
+}
+function addBasicTextLayer(curComp){
+    var newTextLayer = curComp.layers.addText("New Text Layer");
+    return newTextLayer
+}
+function replaceFontBuddyComp(comp){
+   
         var p = confirm("Font Buddy is already in your project \n Would you like to delete it and create a new one?");
         if(p == true){
             comp.remove();
             addFontBuddyCompAndFolder();
         }
-    }
+    
     return comp;
 }
 function refreshSelectedTextLayerFonts(fbcomp){
@@ -841,7 +889,16 @@ function addTextLayersLinkedToControllers(curComp){
         
         var maxArrayLength = Math.max(Math.max(leftTextArray.length, centerTextArray.length), rightTextArray.length);
         if(maxArrayLength <= 0){
-            alert("Please select a controller layer");
+            new function (){
+                controlLayerTextProps = controlLayer.property("Source Text");
+                controlLayerTextDocument = controlLayerTextProps.value;
+                newTextLayer = curComp.layers.addText("Text Layer 1");
+                newTextLayerTextProps = newTextLayer.property("Source Text");
+                // newTextLayerTextDocument = newTextLayerTextProps.value;
+                newTextLayerTextProps.setValue(controlLayerTextDocument);
+                newTextLayerTextProps.expression = "var parentLayer = thisComp.layer(\"" + controlLayer.name + "\").text.sourceText;parentLayer.style.setText(parentLayer)";
+                newTextLayer.name = controlLayer.name + " Linked";
+            };
         }else{
             for(var m = 0; m < maxArrayLength; m++){
                 addLeftAlignText(leftTextArray[m], curComp);
@@ -1100,7 +1157,6 @@ function refreshListItemBoxContents(){
     var fontbuddycomp = getFontBuddyComp();
     //removes all items first
     
-    // alert(ListBoxitems[1]);
     if(listBox.items.length != 0){
         // var listBoxitems = listBox.items;
         for(n = listBox.items.length - 1; n >= 0; n--){
@@ -1406,13 +1462,14 @@ function getFontBuddyComp(){
         if(proj.item(i).name == fbCompName && proj.item(i) instanceof CompItem){
             var comp = proj.item(i);
             break
+        }else{
+            continue
         }
     }
    
-    // comp == false ? alert("No font buddy comp found") : null;
     return comp
 }
-function copyAnimatorProperties(curComp){
+function copyAnimatorPropertiesTextControllers(curComp){
     var textLayers = [];
     var textController;
     var selectedTextControllers = [];
@@ -1425,148 +1482,176 @@ function copyAnimatorProperties(curComp){
                 var textController = curComp.selectedLayers[a];
                 selectedTextControllers.push(curComp.selectedLayers[a]);
                 }else{
-                    textLayers.push(curComp.selectedLayers[a].index);
+                    // textLayers.push(curComp.selectedLayers[a].index);
+                        textLayers.push(curComp.selectedLayers[a]);
+
                 }
-            }else{
-               textLayers.push(curComp.selectedLayers[a].index);
+            }else if(curComp.selectedLayers[a] instanceof TextLayer){
+            //    textLayers.push(curComp.selectedLayers[a].index);
+                    textLayers.push(curComp.selectedLayers[a]);
+
             }
                 
             }
         }
     
         if((selectedTextControllers.length > 1) || (selectedTextControllers.length == 0) || (textLayers.length == 0)){
-            alert("Please only select only one Text Control Layer.\n\nText Control Layers are defined as having \"Font Buddy Control Layer\" markers.\n\nPlease select text layers to copy animation from a Text Control Layer.");
+            alert("Please only select only one Text Control Layer.\n\nText Control Layers are defined as having \"Font Buddy Control Layer\" markers.\n\nPlease select text layers to copy animation from a Text Control Layer.\n\nAlt-Clicking will ignore Text Controllers and use the first selected text layer to copy to other selected text layers.");
         }else{
-                var animatorNumProps = textController.property("ADBE Text Properties").property("ADBE Text Animators").numProperties;
-                var animatorIndexArray = [];
-                //finds the text control animator properties to copy
-                if(animatorNumProps > 0){
+            copyAnimatorProperties(textController, textLayers);
+                
+        }
 
-                    var textAnimators = textController.property("ADBE Text Properties").property("ADBE Text Animators");
+}
+function copyAnimatorPropertiesFirstSelected(curComp){
+    var selectedTextLayers = [];
+    if(curComp.selectedLayers.length < 2){
+        alert("Please selected at least two text layers.\n\nThe first selected layer's animator properties will be pasted to the other text layers");
+    }else{
+        //Filters out all non-text selected layers
+        for(var i = 0; i < curComp.selectedLayers.length; i++){
+            if(curComp.selectedLayers[i] instanceof TextLayer){
+                selectedTextLayers.push(curComp.selectedLayers[i]);
+            }else{
+                continue
+            }
+        }
+    }
+    
+    var copyLayer = selectedTextLayers[0];
+    var pasteLayers = selectedTextLayers.slice(1,selectedTextLayers.length);
+    copyAnimatorProperties(copyLayer, pasteLayers);    
+}
+function copyAnimatorProperties(textController, textLayers){
+    
+    var animatorNumProps = textController.property("ADBE Text Properties").property("ADBE Text Animators").numProperties;
+    var animatorIndexArray = [];
+    //finds the text control animator properties to copy
+    if(animatorNumProps > 0){
 
-                    //Builds array of all text control animators based on property index
-                    for(var d = 1; d <= animatorNumProps; d++){
-                        animatorIndexArray.push(textAnimators.property(d).propertyIndex);
+        var textAnimators = textController.property("ADBE Text Properties").property("ADBE Text Animators");
+
+        //Builds array of all text control animators based on property index
+        for(var d = 1; d <= animatorNumProps; d++){
+            animatorIndexArray.push(textAnimators.property(d).propertyIndex);
+        }
+
+        //Finds and removes all current animators on text layers
+        var textLayerAnimatorIndexArray = [];
+        for(var f = 0; f < textLayers.length; f++){
+                if(textLayers[f].property("ADBE Text Properties").property("ADBE Text Animators").numProperties > 0){
+                    var textlayertoremoveprops = textLayers[f];
+                    var textlayernumprops = textlayertoremoveprops.property("ADBE Text Properties").property("ADBE Text Animators").numProperties;
+                    for(var g = textlayernumprops ; g > 0 ; g--){
+                        textlayertoremoveprops.property("ADBE Text Properties").property("ADBE Text Animators").property(g).remove();
                     }
+                }
+        }
 
-                    //Finds and removes all current animators on text layers
-                    var textLayerAnimatorIndexArray = [];
-                    for(var f = 0; f < textLayers.length; f++){
-                            if(curComp.layer(textLayers[f]).property("ADBE Text Properties").property("ADBE Text Animators").numProperties > 0){
-                                var textlayertoremoveprops = curComp.layer(textLayers[f]);
-                                var textlayernumprops = textlayertoremoveprops.property("ADBE Text Properties").property("ADBE Text Animators").numProperties;
-                                for(var g = textlayernumprops ; g > 0 ; g--){
-                                    textlayertoremoveprops.property("ADBE Text Properties").property("ADBE Text Animators").property(g).remove();
-                                }
+        //loops through all selected text layers to apply animators and properties
+        for(var p = 0; p < textLayers.length; p ++){
+            var currentLayer = textLayers[p];
+            copyAnimators(currentLayer);
+        }
+
+            function copyAnimators(layer){
+                //creates variables for animator group properties
+                //runs master loop for each animator group
+                for(var e = 1; e <= animatorIndexArray.length; e++){
+
+                    //Defines current TEXT CONTROL animator group
+                    var animator = textAnimators.property(e);
+
+                    //Total number of Range Selectors to Add
+                    var totalRangeSelectors = animator.property("ADBE Text Selectors").numProperties;
+                    //adds animator group to text layer
+                    var newAnimator = layer.property("ADBE Text Properties").property("ADBE Text Animators").addProperty("ADBE Text Animator");
+                    //adds range selector group - might need multiple
+                    for(var z = 1; z <= totalRangeSelectors; z++){
+                        var newRangeSelector = newAnimator.property("ADBE Text Selectors").addProperty("ADBE Text Selector");
+                    }
+                    
+                    copyPasteModifedProps(animator);
+                    copyPasteRangeSelectors(animator, newAnimator, textController);
+
+                    //copies the animator modified properties. call it later after range selectors have been added to avoid error.
+                    function copyPasteModifedProps(animator){
+
+                        //Builds array of all modifed animator properties names and values
+                        var animatorPropsArrayMatchName = [];
+                        var animatorPropsArrayValues = [];
+
+                        for(var i = 1; i <= animator.property("ADBE Text Animator Properties").numProperties; i++){
+                            if(animator.property("ADBE Text Animator Properties").property(i).isModified == true){
+                                animatorPropsArrayMatchName.push(animator.property("ADBE Text Animator Properties").property(i).matchName);
+                                animatorPropsArrayValues.push(animator.property("ADBE Text Animator Properties").property(i).value);
                             }
-                    }
+                        }
+                            //adds copied modified properties
+                            for(var c = 0; c < animatorPropsArrayMatchName.length; c++){
 
-                    //loops through all selected text layers to apply animators and properties
-                    for(var p = 0; p < textLayers.length; p ++){
-                        var currentLayer = curComp.layer(textLayers[p]).index;
-                        copyAnimators(currentLayer);
-                    }
-
-                        function copyAnimators(layer){
-                            //creates variables for animator group properties
-                            //runs master loop for each animator group
-                            for(var e = 1; e <= animatorIndexArray.length; e++){
-
-                                //Defines current TEXT CONTROL animator group
-                                var animator = textAnimators.property(e);
-
-                                //Total number of Range Selectors to Add
-                                var totalRangeSelectors = animator.property("ADBE Text Selectors").numProperties;
-                                //adds animator group to text layer
-                                var newAnimator = curComp.layer(layer).property("ADBE Text Properties").property("ADBE Text Animators").addProperty("ADBE Text Animator");
-                                //adds range selector group - might need multiple
-                                for(var z = 1; z <= totalRangeSelectors; z++){
-                                    var newRangeSelector = newAnimator.property("ADBE Text Selectors").addProperty("ADBE Text Selector");
-                                }
+                                var copiedProps = newAnimator.property("ADBE Text Animator Properties").addProperty(animatorPropsArrayMatchName[c]);
+                                copiedProps.setValue(animatorPropsArrayValues[c]);
                                 
-                                copyPasteModifedProps(animator);
-                                copyPasteRangeSelectors(animator, newAnimator, textController);
+                            }                    
 
-                                //copies the animator modified properties. call it later after range selectors have been added to avoid error.
-                                function copyPasteModifedProps(animator){
+                    }
+                    //copies and pastes the range selector properties
+                    function copyPasteRangeSelectors(animator, newAnimator, textController){
+                        //all range selectors on current TEXT CONTROL animator group
+                        var totalRangeSelectors = animator.property("ADBE Text Selectors").numProperties;
+                        for(var i = 1; i <= totalRangeSelectors; i++){
 
-                                    //Builds array of all modifed animator properties names and values
-                                    var animatorPropsArrayMatchName = [];
-                                    var animatorPropsArrayValues = [];
+                            var rangeSelector = animator.property("ADBE Text Selectors").property(i);          
+                            var rangeSelectorOffset = rangeSelector.property("ADBE Text Percent Offset");
+                            var advancedRangeSelector = rangeSelector.property("ADBE Text Range Advanced");
+                            var advancedRangeSelectorArray = [];
 
-                                    for(var i = 1; i <= animator.property("ADBE Text Animator Properties").numProperties; i++){
-                                        if(animator.property("ADBE Text Animator Properties").property(i).isModified == true){
-                                            animatorPropsArrayMatchName.push(animator.property("ADBE Text Animator Properties").property(i).matchName);
-                                            animatorPropsArrayValues.push(animator.property("ADBE Text Animator Properties").property(i).value);
-                                        }
-                                    }
-                                        //adds copied modified properties
-                                        for(var c = 0; c < animatorPropsArrayMatchName.length; c++){
+                            //Builds array for all advanced range selector properties
+                            for(var n = 1; n <= advancedRangeSelector.numProperties; n++){
+                                advancedRangeSelectorArray.push(advancedRangeSelector.property(n).value);
+                            }
 
-                                            var copiedProps = newAnimator.property("ADBE Text Animator Properties").addProperty(animatorPropsArrayMatchName[c]);
-                                            copiedProps.setValue(animatorPropsArrayValues[c]);
-                                            
-                                        }                    
+                            var newRangeSelector = newAnimator.property("ADBE Text Selectors").property(i);
+                            var rangeSelectorOffsetLinked = newRangeSelector.property("ADBE Text Percent Offset");
+                            //Adds expression to link Offsets
+                            rangeSelectorOffsetLinked.expression = "thisComp.layer(\"" + textController.name + "\").text.animator(\""+ animator.name + "\").selector(\""+ rangeSelector.name +"\").offset";
 
-                                }
-                                //copies and pastes the range selector properties
-                                function copyPasteRangeSelectors(animator, newAnimator, textController){
-                                    //all range selectors on current TEXT CONTROL animator group
-                                    var totalRangeSelectors = animator.property("ADBE Text Selectors").numProperties;
-                                    for(var i = 1; i <= totalRangeSelectors; i++){
+                            var newAdvancedRangeSelector = newRangeSelector.property("ADBE Text Range Advanced");
 
-                                        var rangeSelector = animator.property("ADBE Text Selectors").property(i);          
-                                        var rangeSelectorOffset = rangeSelector.property("ADBE Text Percent Offset");
-                                        var advancedRangeSelector = rangeSelector.property("ADBE Text Range Advanced");
-                                        var advancedRangeSelectorArray = [];
-
-                                        //Builds array for all advanced range selector properties
-                                        for(var n = 1; n <= advancedRangeSelector.numProperties; n++){
-                                            advancedRangeSelectorArray.push(advancedRangeSelector.property(n).value);
-                                        }
-
-                                        var newRangeSelector = newAnimator.property("ADBE Text Selectors").property(i);
-                                        var rangeSelectorOffsetLinked = newRangeSelector.property("ADBE Text Percent Offset");
-                                        //Adds expression to link Offsets
-                                        rangeSelectorOffsetLinked.expression = "thisComp.layer(\"" + textController.name + "\").text.animator(\""+ animator.name + "\").selector(\""+ rangeSelector.name +"\").offset";
-
-                                        var newAdvancedRangeSelector = newRangeSelector.property("ADBE Text Range Advanced");
-
-                                        //copies all advanced range properties                                                
-                                        //sets shape and random since those are weird
-                                        var shape = advancedRangeSelector.property("ADBE Text Range Shape").value;
-                                        newAdvancedRangeSelector.property("ADBE Text Range Shape").setValue(shape);
-                                        var random = advancedRangeSelector.property("ADBE Text Randomize Order").value;
-                                        newAdvancedRangeSelector.property("ADBE Text Randomize Order").setValue(random);
-                                        if(shape == 1){
-                                            var smoothness = advancedRangeSelector.property("ADBE Text Selector Smoothness").value;
-                                            newAdvancedRangeSelector.property("ADBE Text Selector Smoothness").setValue(smoothness);
-                                        }
-                                        if(random == 1){
-                                            var randomSeed = advancedRangeSelector.property("ADBE Text Random Seed").value;
-                                            newAdvancedRangeSelector.property("ADBE Text Random Seed").setValue(randomSeed);
-                                        }
-                                        //copies range selector properties via an array
-                                        for(var k = 1; k < advancedRangeSelectorArray.length; k++){
-                                            if((k == 6) || (k == 10)){
-                                                continue
-                                            }else{
-                                            newAdvancedRangeSelector.property(k).setValue(advancedRangeSelectorArray[k - 1]);
-                                            }                
-                                        }
-
-                                    }
-
-                                }
-                                    
+                            //copies all advanced range properties                                                
+                            //sets shape and random since those are weird
+                            var shape = advancedRangeSelector.property("ADBE Text Range Shape").value;
+                            newAdvancedRangeSelector.property("ADBE Text Range Shape").setValue(shape);
+                            var random = advancedRangeSelector.property("ADBE Text Randomize Order").value;
+                            newAdvancedRangeSelector.property("ADBE Text Randomize Order").setValue(random);
+                            if(shape == 1){
+                                var smoothness = advancedRangeSelector.property("ADBE Text Selector Smoothness").value;
+                                newAdvancedRangeSelector.property("ADBE Text Selector Smoothness").setValue(smoothness);
+                            }
+                            if(random == 1){
+                                var randomSeed = advancedRangeSelector.property("ADBE Text Random Seed").value;
+                                newAdvancedRangeSelector.property("ADBE Text Random Seed").setValue(randomSeed);
+                            }
+                            //copies range selector properties via an array
+                            for(var k = 1; k < advancedRangeSelectorArray.length; k++){
+                                if((k == 6) || (k == 10)){
+                                    continue
+                                }else{
+                                newAdvancedRangeSelector.property(k).setValue(advancedRangeSelectorArray[k - 1]);
+                                }                
                             }
 
                         }
-                    
-                }
-                
 
-        }
+                    }
+                        
+                }
+
+            }
+        
+    }
+                
 
 }
 function createAnimatorAndKeyframeOffset(curComp){
@@ -1617,78 +1702,147 @@ function createAnimatorAndKeyframeOffset(curComp){
 
     }
 }
-function readAnimatorProps(curComp){
+
+function displayAnimatorProps(curComp, select, range){
+
+
+    var props = readAnimatorProps(curComp, select, false, range);
+
+    var units = props[0];
+    var basedOn = props[1];
+    var mode = props[2];
+    var amount = props[3];
+    var shape = props[4];
+    var easeHigh = props[5];
+    var easeLow = props[6];
+    var randomizeOrder = props[7];
+    var randomSeed = props[8];
+
+    //Sets Display
+    unitsDropDown.selection = units - 1;
+    basedOnDropDown.selection = basedOn - 1;
+    modeDropDown.selection = mode - 1;
+    amountEditText.text = amount;
+    shapeDropDown.selection = shape - 1;
+    easeHighEditText.text = easeHigh;
+    easeLowEditText.text = easeLow;
+    randomizeOrderCheckbox.value = randomizeOrder;
+    randomSeedEditText.text = randomSeed;
+    
+
+}
+function readAnimatorProps(curComp, select, update, range){
+
+    var selLayer = curComp.selectedLayers[0];
+    var animatorNumProps = selLayer.property("ADBE Text Properties").property("ADBE Text Animators").numProperties;
+    var animatorIndexArray = [];
+    var animatorNameArray = [];
+    var textAnimators = selLayer.property("ADBE Text Properties").property("ADBE Text Animators");
+
+    if(update == true){
+
+        //Builds array of all text control animators based on property index
+        for(var d = 1; d <= animatorNumProps; d++){
+            animatorIndexArray.push(textAnimators.property(d).propertyIndex);
+            animatorNameArray.push(textAnimators.property(d).name);
+        }
+
+        var newSelect = buildAnimatorDropDown(select,animatorNameArray);
+        buildRangeSelectorDropDown(newSelect, textAnimators);
+
+    }
+    
+    //Defines current TEXT CONTROL animator group
+    var animator = textAnimators.property(select + 1);
+    var rangeSelector = animator.property("ADBE Text Selectors").property(range + 1);    
+    var advancedRangeSelector = rangeSelector.property("ADBE Text Range Advanced");
+
+    //Define values
+    var units = advancedRangeSelector.property("ADBE Text Range Units").value;
+    var basedOn = advancedRangeSelector.property("ADBE Text Range Type2").value;
+    var mode = advancedRangeSelector.property("ADBE Text Selector Mode").value;
+    var amount = advancedRangeSelector.property("ADBE Text Selector Max Amount").value;
+    var shape = advancedRangeSelector.property("ADBE Text Range Shape").value;
+    var easeHigh = advancedRangeSelector.property("ADBE Text Levels Max Ease").value;
+    var easeLow = advancedRangeSelector.property("ADBE Text Levels Min Ease").value;
+    var randomizeOrder = advancedRangeSelector.property("ADBE Text Randomize Order").value;
+    var randomSeed = advancedRangeSelector.property(10).value;
+
+    var readprops = [units, basedOn, mode, amount, shape, easeHigh, easeLow, randomizeOrder, randomSeed];
+        
+    return readprops;
+    // return my_array;
+        
+}
+function buildAnimatorDropDown(select, animatorNames){
+
+    var setSelection = select;
+    //Remove all items from drop down first
+    for(var i = animatorNames.length - 1; i >= 0; i--){
+        animatorDropDown.remove(animatorDropDown.items[i]);
+    }
+    //Adds all items from drop down
+    for(var i = 0; i < animatorNames.length; i++){
+        animatorDropDown.add("item", animatorNames[i]);
+    }
+    //Sets selection back to first
+    animatorDropDown.selection = setSelection;
+    // alert("animators built");
+
+    return setSelection;
+
+}
+function buildRangeSelectorDropDown(select, textAnimator){
+    
+    var totalRangeSelectors = textAnimator.property(select + 1).property("ADBE Text Selectors").numProperties;
+    //Remove all items from drop down first
+
+    for(var i = rangeSelectorDropDown.items.length; i >= 0; i--){
+        rangeSelectorDropDown.remove(rangeSelectorDropDown.items[i]);
+    }
+    //Adds all items from drop down
+    for(var i = 1; i <= totalRangeSelectors; i++){
+        rangeSelectorDropDown.add("item", textAnimator.property(select + 1).property("ADBE Text Selectors").property(i).name);
+    }
+    //Sets selection back to first
+    rangeSelectorDropDown.selection = 0;
+    // alert("range selectors built");
+}
+function getSelectedLayerAnimatorProperty(curComp){
+return curComp.selectedLayers[0].property("ADBE Text Properties").property("ADBE Text Animators");
+}
+function updateAnimatorProps(curComp){
     var selLayer = curComp.selectedLayers[0];
 
-    var animatorNumProps = selLayer.property("ADBE Text Properties").property("ADBE Text Animators").numProperties;
-        var animatorIndexArray = [];
-        //finds the text control animator properties to copy
-        if(animatorNumProps > 0){
+    var animatorSelect = animatorDropDown.selection.index;
+    var rangeSelect = rangeSelectorDropDown.selection.index;
 
-            var textAnimators = selLayer.property("ADBE Text Properties").property("ADBE Text Animators");
+    var textAnimators = selLayer.property("ADBE Text Properties").property("ADBE Text Animators");
+    var animator = textAnimators.property(animatorSelect + 1);
+    var rangeSelector = animator.property("ADBE Text Selectors").property(rangeSelect + 1);    
+    var advancedRangeSelector = rangeSelector.property("ADBE Text Range Advanced");
 
-            //Builds array of all text control animators based on property index
-            for(var d = 1; d <= animatorNumProps; d++){
-                animatorIndexArray.push(textAnimators.property(d).propertyIndex);
-            }
+    //Units
+    advancedRangeSelector.property("ADBE Text Range Units").setValue(unitsDropDown.selection.index + 1);
+    basedOn = advancedRangeSelector.property("ADBE Text Range Type2").setValue(basedOnDropDown.selection.index + 1);
+    mode = advancedRangeSelector.property("ADBE Text Selector Mode").setValue(modeDropDown.selection.index + 1);
+    amount = advancedRangeSelector.property("ADBE Text Selector Max Amount").setValue(amountEditText.text);
+    shape = advancedRangeSelector.property("ADBE Text Range Shape").setValue(shapeDropDown.selection.index + 1);
+    easeHigh = advancedRangeSelector.property("ADBE Text Levels Max Ease").setValue(easeHighEditText.text);
+    easeLow = advancedRangeSelector.property("ADBE Text Levels Min Ease").setValue(easeLowEditText.text);
+    randomizeOrder = advancedRangeSelector.property("ADBE Text Randomize Order").setValue(randomizeOrderCheckbox.value);
+    randomSeed = advancedRangeSelector.property(10).setValue(randomSeedEditText.text);
 
-            //creates variables for animator group properties
-            //runs master loop for each animator group
-            var propertyArray = [];
-            for(var e = 1; e <= animatorIndexArray.length; e++){
+    // unitsDropDown.selection
+    // basedOnDropDown.selection = basedOn - 1;
+    // modeDropDown.selection = mode - 1;
+    // amountEditText.text = amount;
+    // shapeDropDown.selection = shape - 1;
+    // easeHighEditText.text = easeHigh;
+    // easeLowEditText.text = easeLow;
+    // randomizeOrderCheckbox.value = randomizeOrder;
+    // randomSeedEditText.text = randomSeed;
 
-                //Defines current TEXT CONTROL animator group
-                var animator = textAnimators.property(e);
-
-                //Total number of Range Selectors to Read
-                var totalRangeSelectors = animator.property("ADBE Text Selectors").numProperties;
-
-                //all range selectors on current TEXT CONTROL animator group
-                //Currently ignoring and just reading the first one
-                // var rangeSelectorCount = animator.property("ADBE Text Selectors").numProperties;
-                var rangeSelector = animator.property("ADBE Text Selectors").property(1);          
-                var rangeSelectorOffset = rangeSelector.property("ADBE Text Percent Offset");
-                var advancedRangeSelector = rangeSelector.property("ADBE Text Range Advanced");
-                
-                //Define values
-                var units = advancedRangeSelector.property("ADBE Text Range Units").value;
-                var basedOn = advancedRangeSelector.property("ADBE Text Range Type2").value;
-                var mode = advancedRangeSelector.property("ADBE Text Selector Mode").value;
-                var amount = advancedRangeSelector.property("ADBE Text Selector Max Amount").value;
-                var shape = advancedRangeSelector.property("ADBE Text Range Shape").value;
-                var easeHigh = advancedRangeSelector.property("ADBE Text Levels Max Ease").value;
-                var easeLow = advancedRangeSelector.property("ADBE Text Levels Min Ease").value;
-                var randomizeOrder = advancedRangeSelector.property("ADBE Text Randomize Order").value;
-                var randomSeed = advancedRangeSelector.property(10).value;
-
-                // propertyArray.push([units,basedOn, mode, amount, shape, easeHigh, easeLow, randomizeOrder, randomSeed]);
-                // return propertyArray;
-
-            }
-
-        }
-
-        alert();
-
-        unitsDropDown.selection = units - 1;
-        basedOnDropDown.selection = basedOn - 1;
-        modeDropDown.selection = mode - 1;
-        amountEditText.text = amount;
-        shapeDropDown.selection = shape - 1;
-        easeHighEditText.text = easeHigh;
-        easeLowEditText.text = easeLow;
-        randomizeOrderCheckbox.value = randomizeOrder;
-        randomSeedEditText.text = randomSeed;
-
-        //Remove all items from drop down first
-        for(var i = animatorIndexArray.length - 1; i >= 0; i--){
-            animatorDropDown.remove(animatorDropDown.items[i]);
-        }
-        //Adds all items from drop down
-        for(var i = 1; i <= animatorIndexArray.length; i++){
-            animatorDropDown.add("item", textAnimators.property(i).name);
-        }
-        //Sets selection back to first
-        animatorDropDown.selection = 0;
+alert("done");
 
 }
