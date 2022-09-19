@@ -164,21 +164,20 @@ function propsToProp(layer, alt, shift, command){
     }
 
     var prop = getSelectedPropertiesOnParent(parent);
-    // alert(prop.length);
-    // var propDepth = prop.propertyDepth;
-
+    
     //Builds array of property names for each property in prop array
     for(var i = 0; i < prop.length; i++){
         var currentProp = prop[i];
         var propname_array = buildPropNameArray(prop[i], prop[i].propertyDepth);
+        alert(propname_array);
         //For each selected layer child copy the property values
         for(var n = 1 + modifyLoop; n < layer.length + modifyLoop; n++){
-            var foundProp = findProperty(layer[n], currentProp, propname_array.reverse(), currentProp.propertyIndex);
+            var foundProp = findProperty(layer[n], currentProp, propname_array, currentProp.propertyIndex);
             if(alt == false){
                 foundProp.property(currentProp.propertyIndex).setValue(currentProp.value);
             }
             if(alt == true){
-                var expression = getExpression();
+                var expression = getExpression(currentProp, propname_array);
                 foundProp.property(currentProp.propertyIndex).expression = expression;
             }    
                 
@@ -232,16 +231,19 @@ function propsToProp(layer, alt, shift, command){
                 //Builds array for properties with no property group
                 propname_array.push(prop.matchName);           
             }else{
+                alert(prop.propertyGroup(i).name);
                 //Builds array for typical properties
                 propname_array.push(prop.propertyGroup(i).matchName);
             }
 
         }
-        return propname_array;
+        return propname_array.reverse();
     }
-    // return foundProps_array;
 }
-function getExpression(){
+function getExpression(prop, proppath){
+    alert(proppath);
+    var layerName = proppath[0].propertyGroup(1).name;
+    alert(layerName);
     return "value"
 }
 function findPropertyType(prop) {
