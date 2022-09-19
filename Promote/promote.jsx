@@ -70,7 +70,8 @@ button3.onClick = function(){
     var layer = getSelectedLayers(getActiveComp(p));
     var alt = checkAltKey();
     app.beginUndoGroup("promote 1");
-    propsToProp(layer, alt);
+    var myProps = propsToProp(layer, alt);
+    alert(myProps.length);
     app.beginUndoGroup();
 
 }
@@ -137,37 +138,33 @@ function promoteProperties(layer, prop){
 
 function propsToProp(layer, alt){
 
-    var propname_array = [];
+    foundProps_array = [];
+
     //First selected layer is the parent
     if(alt == false){
         var parent = layer[0];
         var props = parent.selectedProperties;
-        var prop = props[props.length - 1];
-        var propDepth = prop.propertyDepth;
+        // var prop = props[props.length - 1];
+        var prop = getSelectedPropertiesOnParent(parent);
+        // alert(prop.length);
+        // var propDepth = prop.propertyDepth;
 
-        // alert(prop.propertyIndex);
-        // alert(prop.matchName);
-        // alert(propDepth);
-        //Custom situations for Markers and Timeremapping
+        //Builds array of property names for each property in prop array
+        for(var i = 0; i < prop.length; i++){
 
-        for(var i = 1; i <= Math.max(propDepth - 1, 1); i++){
-            if((prop.propertyIndex == 1) || prop.propertyIndex == 2){
-                //Builds array for properties with no property group
-                propname_array.push(prop.matchName);
-            
-            }else{
-                //Builds array for typical properties
-                propname_array.push(prop.propertyGroup(i).matchName);
-            }
+            var currentProp = prop[i];
+            var propname_array = buildPropNameArray(prop[i], prop[i].propertyDepth);
+            //For each selected layer child copy the property values
+            for(var n = 1; n < layer.length; n++){
+                var foundProp = findProperty(layer[n], currentProp, propname_array.reverse(), currentProp.propertyIndex);
+                foundProps_array.push(foundProp.property(currentProp.propertyIndex));
+                // foundProp.property(currentProp.propertyIndex).setValue(currentProp.value);
+                              
+            }  
 
         }
-        for(var i = 1; i <= layer.length; i++){
-            var foundProp = findProperty(layer[i], prop, propname_array.reverse(), prop.propertyIndex);
-            alert(foundProp.property(prop.propertyIndex).value);
-        }
 
-        
-
+      
     }
     //Last selected layer is the parent
     if(alt == true){
@@ -176,40 +173,27 @@ function propsToProp(layer, alt){
         var prop = props[props.length - 1];
         var propDepth = prop.propertyDepth;
 
-        for(var i = 1; i <= propDepth - 1; i++){
-            propname_array.push(prop.propertyGroup(i).matchName);
-        }
+        //Builds array of property names
+        var propname_array = buildPropNameArray(prop, propDepth);
+
+        //For each selected layer child
         for(var i = 0; i < layer.length - 1; i++){
-            findProperty(layer[i], prop, propname_array.reverse());
+            var foundProp = findProperty(layer[i], prop, propname_array.reverse(), prop.propertyIndex);
+            foundProp.property(prop.propertyIndex).setValue(prop.value);
         }
 
     }
-
-    function findProperty(layer, prop, array, index){
+    //Finds the property in the child layer. Returns property. May need property index to set value later.
+    function findProperty(layer, prop, array){
         // alert(array);
         for(var i = 1; i <= layer.numProperties; i++){
             var p = layer.property(i);
-
             if(p.matchName == array[0]){
                 // alert("Matched");
                 if(array.length > 1){
                     findProperty(p, prop, array.slice(1, array.length));
-                }else{
-                    if(index == 1){
-                    //Markers (prop index 1)
-                    break
-                    }
-                    if(index == 2){
-                    //Time Remapping (prop index 2)
-                    p.setValueAtTime(0, prop.value);
-                    break
-                    }
-                    if(index > 2){
-                    //Everything else            
-                    // p.property(prop.propertyIndex).setValue(prop.value);
-                    return p;
-                    }
-
+                }else{          
+                    return p;                 
                 }
 
             }else{
@@ -219,7 +203,38 @@ function propsToProp(layer, alt){
         }
 
     }
+    function getSelectedPropertiesOnParent(layer){
 
+        var allSelectedProps_array = layer.selectedProperties;
+        var selectedProps_array = [];
+        //Eliminates any nested or named property groups
+        for(var i = 0; i < allSelectedProps_array.length; i++){
+            if((layer.selectedProperties[i].propertyType === PropertyType.INDEXED_GROUP)|| (layer.selectedProperties[i].propertyType === PropertyType.NAMED_GROUP)){
+                // alert("This is not the property you want");
+                continue
+            }else{
+                selectedProps_array.push(layer.selectedProperties[i]);
+            }
+        }
+        return selectedProps_array;
+    }
+
+    //Builds array of all property groups to find the property in child layers
+    function buildPropNameArray(prop, propDepth){
+        var propname_array = [];
+        for(var i = 1; i <= Math.max(propDepth - 1, 1); i++){
+            if((prop.propertyIndex == 1) || prop.propertyIndex == 2){
+                //Builds array for properties with no property group
+                propname_array.push(prop.matchName);           
+            }else{
+                //Builds array for typical properties
+                propname_array.push(prop.propertyGroup(i).matchName);
+            }
+
+        }
+        return propname_array;
+    }
+    return foundProps_array;
 }
 
 function findPropertyType(prop) {
@@ -257,8 +272,3 @@ function findPropertyType(prop) {
         }
     }
 }
-
-
-// var selectedProperty = app.project.activeItem.selectedProperties[1];
-
-// findPropertyType(selectedProperty);
