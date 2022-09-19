@@ -1,0 +1,3 @@
+Copy multiple selected properties from one layer onto all other selected layers if possible
+
+Select properties on all layers from one layer

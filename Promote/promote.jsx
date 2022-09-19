@@ -66,13 +66,25 @@ button2.onClick = function(){
 
 }
 button3.addEventListener("keydown", checkAltKey);
+button3.addEventListener("keydown", checkShiftKey);
 button3.onClick = function(){
     var layer = getSelectedLayers(getActiveComp(p));
     var alt = checkAltKey();
+    var shift = checkShiftKey();
+    var command = 1;
     app.beginUndoGroup("promote 1");
-    var myProps = propsToProp(layer, alt);
-    alert(myProps.length);
+    propsToProp(layer, alt, shift, command);
     app.beginUndoGroup();
+
+}
+function checkShiftKey(){
+
+    var keyState = ScriptUI.environment.keyboardState;
+    if(keyState.shiftKey){
+        return true
+    }else{
+        return false
+    }
 
 }
 function checkAltKey(){
@@ -102,6 +114,7 @@ function getSelectedLayers(comp){
         return comp.selectedLayers;
     }
 };
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 function promoteSelectedPropertiesToSelf(layer){
     if(layer.length == 1) {
@@ -136,53 +149,45 @@ function promoteProperties(layer, prop){
     layer.property("ADBE Effect Parade").addProperty("ADBE Slider Control").name = prop.name;
 }; 
 
-function propsToProp(layer, alt){
+function propsToProp(layer, alt, shift, command){
 
     foundProps_array = [];
 
     //First selected layer is the parent
-    if(alt == false){
+    if(shift == false){
         var parent = layer[0];
-        var props = parent.selectedProperties;
-        // var prop = props[props.length - 1];
-        var prop = getSelectedPropertiesOnParent(parent);
-        // alert(prop.length);
-        // var propDepth = prop.propertyDepth;
-
-        //Builds array of property names for each property in prop array
-        for(var i = 0; i < prop.length; i++){
-
-            var currentProp = prop[i];
-            var propname_array = buildPropNameArray(prop[i], prop[i].propertyDepth);
-            //For each selected layer child copy the property values
-            for(var n = 1; n < layer.length; n++){
-                var foundProp = findProperty(layer[n], currentProp, propname_array.reverse(), currentProp.propertyIndex);
-                foundProps_array.push(foundProp.property(currentProp.propertyIndex));
-                // foundProp.property(currentProp.propertyIndex).setValue(currentProp.value);
-                              
-            }  
-
-        }
-
-      
+        var modifyLoop = 0;
     }
-    //Last selected layer is the parent
-    if(alt == true){
+    if(shift == true){
         var parent = layer[layer.length - 1];
-        var props = parent.selectedProperties;
-        var prop = props[props.length - 1];
-        var propDepth = prop.propertyDepth;
-
-        //Builds array of property names
-        var propname_array = buildPropNameArray(prop, propDepth);
-
-        //For each selected layer child
-        for(var i = 0; i < layer.length - 1; i++){
-            var foundProp = findProperty(layer[i], prop, propname_array.reverse(), prop.propertyIndex);
-            foundProp.property(prop.propertyIndex).setValue(prop.value);
-        }
-
+        var modifyLoop = -1;
     }
+
+    var prop = getSelectedPropertiesOnParent(parent);
+    // alert(prop.length);
+    // var propDepth = prop.propertyDepth;
+
+    //Builds array of property names for each property in prop array
+    for(var i = 0; i < prop.length; i++){
+        var currentProp = prop[i];
+        var propname_array = buildPropNameArray(prop[i], prop[i].propertyDepth);
+        //For each selected layer child copy the property values
+        for(var n = 1 + modifyLoop; n < layer.length + modifyLoop; n++){
+            var foundProp = findProperty(layer[n], currentProp, propname_array.reverse(), currentProp.propertyIndex);
+            if(alt == false){
+                foundProp.property(currentProp.propertyIndex).setValue(currentProp.value);
+            }
+            if(alt == true){
+                var expression = getExpression();
+                foundProp.property(currentProp.propertyIndex).expression = expression;
+            }    
+                
+            }
+                            
+        }  
+
+    
+
     //Finds the property in the child layer. Returns property. May need property index to set value later.
     function findProperty(layer, prop, array){
         // alert(array);
@@ -234,9 +239,11 @@ function propsToProp(layer, alt){
         }
         return propname_array;
     }
-    return foundProps_array;
+    // return foundProps_array;
 }
-
+function getExpression(){
+    return "value"
+}
 function findPropertyType(prop) {
     if (prop.propertyValueType == 6413) {
         alert("This is 3D Point Property");
