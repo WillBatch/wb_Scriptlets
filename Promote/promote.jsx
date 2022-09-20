@@ -164,40 +164,47 @@ function propsToProp(layer, alt, shift, command){
     }
 
     var prop = getSelectedPropertiesOnParent(parent);
+    // alert(prop[0].name);
     
     //Builds array of property names for each property in prop array
     for(var i = 0; i < prop.length; i++){
         var currentProp = prop[i];
+        // alert(currentProp.matchName);
         var propname_array = buildPropNameArray(prop[i], prop[i].propertyDepth);
         alert(propname_array);
         //For each selected layer child copy the property values
         for(var n = 1 + modifyLoop; n < layer.length + modifyLoop; n++){
-            var foundProp = findProperty(layer[n], currentProp, propname_array, currentProp.propertyIndex);
-            if(alt == false){
-                foundProp.property(currentProp.propertyIndex).setValue(currentProp.value);
-            }
-            if(alt == true){
-                var expression = getExpression(currentProp, propname_array);
-                foundProp.property(currentProp.propertyIndex).expression = expression;
-            }    
+            // alert(layer[n].name);
+            findProperty(layer[n], currentProp, propname_array);
+            alert("Copied");
+            // if(alt == false){
+            //     // alert(currentProp.value);
+            //     // alert(foundProp.matchName);
+            //     // foundProp.setValue(currentProp.value);
+            //     foundProp.property(currentProp.propertyIndex).setValue(currentProp.value);
+            // }
+            // if(alt == true){
+            //     var expression = getExpression(currentProp, propname_array);
+            //     foundProp.property(currentProp.propertyIndex).expression = expression;
+            // }    
                 
             }
                             
         }  
 
-    
-
     //Finds the property in the child layer. Returns property. May need property index to set value later.
     function findProperty(layer, prop, array){
-        // alert(array);
+        // alert(layer.name);
         for(var i = 1; i <= layer.numProperties; i++){
             var p = layer.property(i);
             if(p.matchName == array[0]){
-                // alert("Matched");
+                alert("Matched");
                 if(array.length > 1){
                     findProperty(p, prop, array.slice(1, array.length));
-                }else{          
-                    return p;                 
+                }else{
+                    alert("here");
+                    modifyFoundProperty(p, prop);
+                    // p.property(prop.propertyIndex).setValue(prop.value);                 
                 }
 
             }else{
@@ -207,6 +214,17 @@ function propsToProp(layer, alt, shift, command){
         }
 
     }
+
+    function modifyFoundProperty(foundProp, parentProp){
+        if(alt == false){
+            foundProp.property(parentProp.propertyIndex).setValue(parentProp.value);
+        }
+        if(alt == true){
+            var expression = getExpression(parentProp, propname_array);
+            foundProp.property(parentProp.propertyIndex).expression = expression;
+        }    
+    }
+
     function getSelectedPropertiesOnParent(layer){
 
         var allSelectedProps_array = layer.selectedProperties;
@@ -226,12 +244,15 @@ function propsToProp(layer, alt, shift, command){
     //Builds array of all property groups to find the property in child layers
     function buildPropNameArray(prop, propDepth){
         var propname_array = [];
+        var propIndex = prop.propertyGroup(propDepth-1);
+        
         for(var i = 1; i <= Math.max(propDepth - 1, 1); i++){
-            if((prop.propertyIndex == 1) || prop.propertyIndex == 2){
+            if((propIndex.propertyIndex == 1) || propIndex.propertyIndex == 2){
                 //Builds array for properties with no property group
+                
                 propname_array.push(prop.matchName);           
             }else{
-                alert(prop.propertyGroup(i).name);
+                // alert(prop.propertyGroup(i).name);
                 //Builds array for typical properties
                 propname_array.push(prop.propertyGroup(i).matchName);
             }
