@@ -1,0 +1,6 @@
+Could not find matching images for the following:
+
+Justin Batchelor Avatar Image
+Lydia Vasquez Avatar Image
+
+Make sure the image file name matches the name on the talent ID.

@@ -224,6 +224,13 @@ function propsToProp(layer, alt, shift, command){
             foundProp.property(parentProp.propertyIndex).expression = expression;
         }    
     }
+    
+    function getExpression(prop, proppath){
+        alert(proppath);
+        var layerName = proppath[0].propertyGroup(1).name;
+        alert(layerName);
+        return "value"
+    }
 
     function getSelectedPropertiesOnParent(layer){
 
@@ -261,12 +268,7 @@ function propsToProp(layer, alt, shift, command){
         return propname_array.reverse();
     }
 }
-function getExpression(prop, proppath){
-    alert(proppath);
-    var layerName = proppath[0].propertyGroup(1).name;
-    alert(layerName);
-    return "value"
-}
+
 function findPropertyType(prop) {
     if (prop.propertyValueType == 6413) {
         alert("This is 3D Point Property");
