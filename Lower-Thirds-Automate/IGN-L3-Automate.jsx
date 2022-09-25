@@ -4,6 +4,9 @@ var templateFolderName = "001_Templates";
 var renderFolderName = "002_Render";
 var imageCompFolderName = "003_Avatar Image Comps";
 var imageAssetFolderName = "004_Avatar Image Assets";
+var pos_array = ["L", "R"];
+var res_array = ["HD", "4K"];
+var fr_array = ["30", "60"];
 
 //Searches project for folders. Creates if missing.
 var templateFolder = addTemplateFolder();
@@ -126,7 +129,7 @@ function findTemplates(){
         return true
     }
     function checkExistingParentFolder(select){
-        if(select.parentFolder != undefined){
+        if(select.parentFolder.name != "Root"){
             var currentParentFolder = select.parentFolder;
             currentParentFolder.parentFolder = templateFolder;
         }else{
@@ -135,10 +138,23 @@ function findTemplates(){
     }
 };
 
+
 if(findTemplates() != false){
 //Imports images and puts them into avatar folder
 var imageFiles = Folder("./Avatar Images").getFiles();
-
+var templateComps = (function grabTemplateComps(folder, array){
+    var template_array = array;
+    for(var i = 1; i <= folder.numItems; i++){
+        if(folder.item(i) instanceof CompItem){
+            template_array.push(folder.item(i).name);
+            
+        }
+        if(folder.item(i) instanceof FolderItem){
+            grabTemplateComps(folder.item(i), template_array);
+        }
+    }
+    return template_array;
+    }(templateFolder, []));
 for(var i = 0; i< imageFiles.length; i++){
     var exists = checkImageExists(imageFiles[i], proj);
     if(exists != true){
@@ -175,9 +191,13 @@ if(csvFile != null){
 
     var thisCSVRow;
 
+
     for(var i = 1; i < csvData.length; i++) {
         thisCSVRow = csvData[i].split(",");
-        makeLowerThirdComp(thisCSVRow);
+        makeLowerThirdComp(thisCSVRow, pos_array[0], res_array[0], fr_array[1]);
+        makeLowerThirdComp(thisCSVRow, pos_array[1], res_array[0], fr_array[1]);
+        makeLowerThirdComp(thisCSVRow, pos_array[0], res_array[1], fr_array[1]);
+        makeLowerThirdComp(thisCSVRow, pos_array[1], res_array[1], fr_array[1]);
         }
         alertMissingImages();
         alert("Done");
@@ -186,9 +206,6 @@ if(csvFile != null){
 
 }
 }
-
-
-
 
 function checkForDuplicates(name){
 
@@ -209,29 +226,30 @@ function checkForDuplicates(name){
     return compExists;
 
 }
-function makeLowerThirdComp(row){
+function makeLowerThirdComp(row, pos, res, fr){
     var name = row[0];
     var social = row[1];
     var credit = row[2];
-    var position = row[3];
-    var res = row[4];
+    var position = pos;
+    var res;
+    var fr;
 
-    if(credit == ""){
-        var compName = name + "_2Line_" + position + "_" + res;
+    if((credit == " ") || (credit == "") || credit == undefined){
+        var compName = name + "_2Line_" + position + "_" + res + "_" + fr;
         var exists = checkForDuplicates(compName);
         if(exists != true){
-        make2LineLowerThird();
+        makeLowerThird(2);
         }
     }else{
-        var compName = name + "_3Line_" + credit + "_" + position + "_" + res;
+        var compName = name + "_3Line_" + credit + "_" + position + "_" + res + "_" + fr;
         var exists = checkForDuplicates(compName);
         if(exists != true){
-        make3LineLowerThird();
+        makeLowerThird(3);
         }
     }
 
-    function make2LineLowerThird(){
-        var templateCompFolder = proj.item(2);
+    function makeLowerThird(lines){
+        var templateCompFolder = templateFolder;
         if(position == "L"){
             if(res == "HD"){
                 var comp = templateCompFolder.item(2);
@@ -250,41 +268,53 @@ function makeLowerThirdComp(row){
         addImageToAvatarComp(avatarComp, name);
 
         var newComp = comp.duplicate();
-        newComp.name = name + "_2Line_" + position + "_" + res;
-        newComp.parentFolder = nameFolder;
-        changeTextName(name, newComp);
-        changeTextSocial(social, newComp);
-        newComp.layer("AvatarPlaceholder").replaceSource(avatarComp, true);
-        
-    }
-    function make3LineLowerThird(){
-        var templateCompFolder = proj.item(7);
-        if(position == "L"){
-            if(res == "HD"){
-                var comp = templateCompFolder.item(2);
-            }else{
-                var comp = templateCompFolder.item(1);
-            }
-        }else{
-            if(res == "HD"){
-                var comp = templateCompFolder.item(4);
-            }else{
-                var comp = templateCompFolder.item(3);
-            }
+        var lineString = "_" + lines.toString() + "Line_";
+        if(lines == 2){
+        newComp.name = name + lineString + position + "_" + res + "_" + fr;
         }
-        var nameFolder = addNameRenderFolder(proj, name);
-        var avatarComp = addAvatarComp(app.project, name, nameFolder);
-
-        addImageToAvatarComp(avatarComp, name);
-
-        var newComp = comp.duplicate();
-        newComp.name = name + "_3Line_" + credit + "_" + position + "_" + res;
+        if(lines == 3){
+        newComp.name = name + "_" + credit + lineString + position + "_" + res + "_" + fr;
+        }
         newComp.parentFolder = nameFolder;
         changeTextName(name, newComp);
         changeTextSocial(social, newComp);
         changeTextCredit(credit, newComp);
+        if(newComp.layer("AvatarPlaceholder") != undefined){
         newComp.layer("AvatarPlaceholder").replaceSource(avatarComp, true);
+        }
+        
     }
+    // function make3LineLowerThird(){
+    //     var templateCompFolder = templateFolder;
+    //     if(position == "L"){
+    //         if(res == "HD"){
+    //             var comp = templateCompFolder.item(2);
+    //         }else{
+    //             var comp = templateCompFolder.item(1);
+    //         }
+    //     }else{
+    //         if(res == "HD"){
+    //             var comp = templateCompFolder.item(4);
+    //         }else{
+    //             var comp = templateCompFolder.item(3);
+    //         }
+    //     }
+    //     var nameFolder = addNameRenderFolder(proj, name);
+    //     var avatarComp = addAvatarComp(app.project, name, nameFolder);
+
+    //     addImageToAvatarComp(avatarComp, name);
+
+    //     var newComp = comp.duplicate();
+    //     newComp.name = name + "_3Line_" + credit + "_" + position + "_" + res;
+    //     newComp.parentFolder = nameFolder;
+    //     changeTextName(name, newComp);
+    //     changeTextSocial(social, newComp);
+    //     changeTextCredit(credit, newComp);
+    //     if(newComp.layer("AvatarPlaceholder") != undefined){
+    //     newComp.layer("AvatarPlaceholder").replaceSource(avatarComp, true);
+    //     }
+
+    // }
     function addNameRenderFolder(project, name){
         //checks for active comp and adds one if not active
 
@@ -386,22 +416,34 @@ function makeLowerThirdComp(row){
 
     }
     function changeTextName(name, newComp){
+        if(newComp.layer("Name") != undefined){
         var textProp = newComp.layer("Name").property("Source Text");
         textDocument = textProp.value;
         textDocument.text = name;
         textProp.setValue(textDocument);
+        }
+        
+        return
     }
     function changeTextSocial(social, newComp){
+        if(newComp.layer("Social") != undefined){
         var textProp = newComp.layer("Social").property("Source Text");
         textDocument = textProp.value;
         textDocument.text = social;
         textProp.setValue(textDocument);
+        }
+
+        return
     }
     function changeTextCredit(credit, newComp){
+        if(newComp.layer("Credit") != undefined){
         var textProp = newComp.layer("Credit").property("Source Text");
         textDocument = textProp.value;
         textDocument.text = credit;
         textProp.setValue(textDocument);
+        }
+
+        return
     }
 
 }
@@ -426,8 +468,11 @@ function alertMissingImages(){
         str +=  "\n" + imagename_array[i];
     }
     var textToAlert = "Could not find matching images for the following:" + "\n" + str + "\n\n" + "Make sure the image file name matches the name on the talent ID."
+    if(imagename_array.length < 0){
     alertToText(textToAlert);
     alert(textToAlert);
+    }
+ 
 }
 function alertToText(text){
 
