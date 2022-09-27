@@ -194,10 +194,10 @@ if(csvFile != null){
 
     for(var i = 1; i < csvData.length; i++) {
         thisCSVRow = csvData[i].split(",");
-        makeLowerThirdComp(thisCSVRow, pos_array[0], res_array[0], fr_array[1]);
-        makeLowerThirdComp(thisCSVRow, pos_array[1], res_array[0], fr_array[1]);
-        makeLowerThirdComp(thisCSVRow, pos_array[0], res_array[1], fr_array[1]);
-        makeLowerThirdComp(thisCSVRow, pos_array[1], res_array[1], fr_array[1]);
+        makeLowerThirdComp(thisCSVRow, pos_array[0], res_array[0], fr_array[1], i);
+        makeLowerThirdComp(thisCSVRow, pos_array[1], res_array[0], fr_array[1], i);
+        makeLowerThirdComp(thisCSVRow, pos_array[0], res_array[1], fr_array[1], i);
+        makeLowerThirdComp(thisCSVRow, pos_array[1], res_array[1], fr_array[1], i);
         }
         alertMissingImages();
         alert("Done");
@@ -226,13 +226,15 @@ function checkForDuplicates(name){
     return compExists;
 
 }
-function makeLowerThirdComp(row, pos, res, fr){
+function makeLowerThirdComp(row, pos, res, fr, currentRow){
     var name = row[0];
     var social = row[1];
     var credit = row[2];
     var position = pos;
     var res;
     var fr;
+
+
 
     if((credit == " ") || (credit == "") || credit == undefined){
         var compName = name + "_2Line_" + position + "_" + res + "_" + fr;
@@ -249,7 +251,20 @@ function makeLowerThirdComp(row, pos, res, fr){
     }
 
     function makeLowerThird(lines){
-        var templateCompFolder = templateFolder;
+        // for(var i = 1; i <= templateFolder.numItems; i++){
+        //     var folderStr = templateFolder.item(i).name.split("_")[0];
+        //     if(folderStr === lines.toString()){
+        //         var templateCompFolder = templateFolder.item(i);
+        //         break
+        //     }
+        // }
+        // if(lines == 2){
+        // }
+        // if(lines == 3){
+        //     var templateCompFolder = templateFolder.item(6);
+        // }
+        var templateCompFolder = templateFolder.item(lines - 1);
+        
         if(position == "L"){
             if(res == "HD"){
                 var comp = templateCompFolder.item(2);
@@ -445,7 +460,6 @@ function makeLowerThirdComp(row, pos, res, fr){
 
         return
     }
-
 }
 function alertMissingImages(){
     var imagename_array = [];
@@ -467,8 +481,9 @@ function alertMissingImages(){
  
         str +=  "\n" + imagename_array[i];
     }
-    var textToAlert = "Could not find matching images for the following:" + "\n" + str + "\n\n" + "Make sure the image file name matches the name on the talent ID."
-    if(imagename_array.length < 0){
+
+    var textToAlert = "Could not find matching images for the following:" + "\n" + str + "\n\n" + "Make sure the image file name matches the name on the talent ID.";
+    if(imagename_array.length > 0){
     alertToText(textToAlert);
     alert(textToAlert);
     }
