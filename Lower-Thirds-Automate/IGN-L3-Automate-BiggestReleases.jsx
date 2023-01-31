@@ -2,11 +2,13 @@ var proj = app.project;
 var fileNameEdit = "MissingImages";
 var templateFolderName = "001_Templates";
 var renderFolderName = "002_Render";
-var imageCompFolderName = "003_Avatar Image Comps";
-var imageAssetFolderName = "004_Avatar Image Assets";
-var pos_array = ["L", "R"];
-var res_array = ["HD", "4K"];
-var fr_array = ["30", "60"];
+var imageCompFolderName = "003_Image Comps";
+var imageAssetFolderName = "004_Image Files";
+var tempMedia = "Temp Logo";
+var imageFileImport = new Folder().selectDlg("Please select the folder with images.");
+// var pos_array = ["L", "R"];
+// var res_array = ["HD", "4K"];
+// var fr_array = ["30", "60"];
 
 //Searches project for folders. Creates if missing.
 var templateFolder = addTemplateFolder();
@@ -63,7 +65,7 @@ function addAvatarFolder(){
     var folderExists = false;
     for(var n = 1; n <= proj.numItems; n++){
         
-        if((proj.item(n).name == "004_Avatar Image Assets") && (proj.item(n) instanceof FolderItem)){
+        if((proj.item(n).name == imageAssetFolderName) && (proj.item(n) instanceof FolderItem)){
             var folderExists = true;
             var folder = proj.item(n);
             break        
@@ -73,7 +75,7 @@ function addAvatarFolder(){
     }
     //adds folder
     if(folderExists != true){
-        var folder = proj.items.addFolder("004_Avatar Image Assets");
+        var folder = proj.items.addFolder(imageAssetFolderName);
     }
     return folder;
 }
@@ -84,7 +86,7 @@ function addAvatarCompFolder(){
     var folderExists = false;
     for(var n = 1; n <= proj.numItems; n++){
         
-        if((proj.item(n).name == "003_Avatar Image Comps") && (proj.item(n) instanceof FolderItem)){
+        if((proj.item(n).name == imageCompFolderName) && (proj.item(n) instanceof FolderItem)){
             var folderExists = true;
             var folder = proj.item(n);
             break        
@@ -94,7 +96,7 @@ function addAvatarCompFolder(){
     }
     //adds folder
     if(folderExists != true){
-        var folder = proj.items.addFolder("003_Avatar Image Comps");
+        var folder = proj.items.addFolder(imageCompFolderName);
     }
     return folder;
 }
@@ -141,7 +143,7 @@ function findTemplates(){
 
 if(findTemplates() != false){
 //Imports images and puts them into avatar folder
-var imageFiles = Folder("./Avatar Images").getFiles();
+var imageFiles = imageFileImport.getFiles();
 var templateComps = (function grabTemplateComps(folder, array){
     var template_array = array;
     for(var i = 1; i <= folder.numItems; i++){
@@ -194,10 +196,8 @@ if(csvFile != null){
 
     for(var i = 1; i < csvData.length; i++) {
         thisCSVRow = csvData[i].split(",");
-        makeLowerThirdComp(thisCSVRow, pos_array[0], res_array[0], fr_array[1], i);
-        makeLowerThirdComp(thisCSVRow, pos_array[1], res_array[0], fr_array[1], i);
-        makeLowerThirdComp(thisCSVRow, pos_array[0], res_array[1], fr_array[1], i);
-        makeLowerThirdComp(thisCSVRow, pos_array[1], res_array[1], fr_array[1], i);
+        makeLowerThirdComp(thisCSVRow, 1);
+        makeLowerThirdComp(thisCSVRow, 2);
         }
         alertMissingImages();
         alert("Done");
@@ -226,110 +226,47 @@ function checkForDuplicates(name){
     return compExists;
 
 }
-function makeLowerThirdComp(row, pos, res, fr, currentRow){
+function makeLowerThirdComp(row, c){
     var name = row[0];
-    var social = row[1];
-    var credit = row[2];
-    var position = pos;
-    var res;
-    var fr;
 
-
-
-    if((credit == " ") || (credit == "") || credit == undefined){
-        var compName = name + "_2Line_" + position + "_" + res + "_" + fr;
+    if(c == 1){
+        var compName = name;
         var exists = checkForDuplicates(compName);
         if(exists != true){
-        makeLowerThird(2);
+        makeLowerThird(compName, 1);
         }
-    }else{
-        var compName = name + "_3Line_" + credit + "_" + position + "_" + res + "_" + fr;
+    }
+        if(c == 2){
+        var compName = name  + "_LogoOnly";
         var exists = checkForDuplicates(compName);
         if(exists != true){
-        makeLowerThird(3);
+        makeLowerThird(compName, 2);
         }
     }
 
-    function makeLowerThird(lines){
-        // for(var i = 1; i <= templateFolder.numItems; i++){
-        //     var folderStr = templateFolder.item(i).name.split("_")[0];
-        //     if(folderStr === lines.toString()){
-        //         var templateCompFolder = templateFolder.item(i);
-        //         break
-        //     }
-        // }
-        // if(lines == 2){
-        // }
-        // if(lines == 3){
-        //     var templateCompFolder = templateFolder.item(6);
-        // }
-        var templateCompFolder = templateFolder.item(lines - 1);
-        
-        if(position == "L"){
-            if(res == "HD"){
-                var comp = templateCompFolder.item(2);
-            }else{
-                var comp = templateCompFolder.item(1);
-            }
-        }else{
-            if(res == "HD"){
-                var comp = templateCompFolder.item(4);
-            }else{
-                var comp = templateCompFolder.item(3);
-            }
-        }
+    function makeLowerThird(compName, c){
+
+        // var templateCompFolder = templateFolder.item(c);
+
+        var comp = app.project.item(1).item(c);
         var nameFolder = addNameRenderFolder(proj, name);
         var avatarComp = addAvatarComp(app.project, name, nameFolder);
         addImageToAvatarComp(avatarComp, name);
 
         var newComp = comp.duplicate();
-        var lineString = "_" + lines.toString() + "Line_";
-        if(lines == 2){
-        newComp.name = name + lineString + position + "_" + res + "_" + fr;
-        }
-        if(lines == 3){
-        newComp.name = name + "_" + credit + lineString + position + "_" + res + "_" + fr;
-        }
+
+        newComp.name = compName;
+        
         newComp.parentFolder = nameFolder;
-        changeTextName(name, newComp);
-        changeTextSocial(social, newComp);
-        changeTextCredit(credit, newComp);
-        if(newComp.layer("AvatarPlaceholder") != undefined){
-        newComp.layer("AvatarPlaceholder").replaceSource(avatarComp, true);
+        // changeTextName(name, newComp);
+        // changeTextSocial(social, newComp);
+        // changeTextCredit(credit, newComp);
+        if(newComp.layer(tempMedia) != undefined){
+        newComp.layer(tempMedia).replaceSource(avatarComp, true);
         }
         
     }
-    // function make3LineLowerThird(){
-    //     var templateCompFolder = templateFolder;
-    //     if(position == "L"){
-    //         if(res == "HD"){
-    //             var comp = templateCompFolder.item(2);
-    //         }else{
-    //             var comp = templateCompFolder.item(1);
-    //         }
-    //     }else{
-    //         if(res == "HD"){
-    //             var comp = templateCompFolder.item(4);
-    //         }else{
-    //             var comp = templateCompFolder.item(3);
-    //         }
-    //     }
-    //     var nameFolder = addNameRenderFolder(proj, name);
-    //     var avatarComp = addAvatarComp(app.project, name, nameFolder);
-
-    //     addImageToAvatarComp(avatarComp, name);
-
-    //     var newComp = comp.duplicate();
-    //     newComp.name = name + "_3Line_" + credit + "_" + position + "_" + res;
-    //     newComp.parentFolder = nameFolder;
-    //     changeTextName(name, newComp);
-    //     changeTextSocial(social, newComp);
-    //     changeTextCredit(credit, newComp);
-    //     if(newComp.layer("AvatarPlaceholder") != undefined){
-    //     newComp.layer("AvatarPlaceholder").replaceSource(avatarComp, true);
-    //     }
-
-    // }
+    // 
     function addNameRenderFolder(project, name){
         //checks for active comp and adds one if not active
 
@@ -356,7 +293,7 @@ function makeLowerThirdComp(row, pos, res, fr, currentRow){
     }
     function addAvatarComp(project, name, folder){
         var avatarComps_array = [];
-        var avatarCompName = name + " Avatar Image";
+        var avatarCompName = name + " Logo Image";
         //checks for comp
         var compExists = false;
         for(var n = 1; n <= project.numItems; n++){
@@ -372,7 +309,7 @@ function makeLowerThirdComp(row, pos, res, fr, currentRow){
         }
         //adds comp
         if(compExists != true){
-            var avatarComp = project.items.addComp(avatarCompName, 256, 256, 1, 10, 60);
+            var avatarComp = project.items.addComp(avatarCompName, 200, 105, 1, 10, 60);
             avatarComps_array.push(avatarComp.name);
             for(var i = 1; i <= project.numItems; i++){
                 if(project.item(i).name == folder.name){
@@ -405,29 +342,26 @@ function makeLowerThirdComp(row, pos, res, fr, currentRow){
             if(keyImage != undefined){
                 comp.layers.add(keyImage);
 
-                var imageW = parseInt(comp.layer(1).sourceRectAtTime(0, false).width);
-                var imageH = parseInt(comp.layer(1).sourceRectAtTime(0, false).height);
+                // var imageW = parseInt(comp.layer(1).sourceRectAtTime(0, false).width);
+                // var imageH = parseInt(comp.layer(1).sourceRectAtTime(0, false).height);
 
-                if(imageW < imageH){
-                    // cmdID = app.findMenuCommandId('Fit to Comp Width');
-                    cmdID = 2732;
-                }
-                if(imageW >= imageH){
-                    cmdID = 2733; 
-                }
+                // if(imageW < imageH){
+                //     // cmdID = app.findMenuCommandId('Fit to Comp Width');
+                //     cmdID = 2732;
+                // }
+                // if(imageW >= imageH){
+                //     cmdID = 2733; 
+                // }
 
-                comp.openInViewer().setActive();
-                comp.layer(1).selected = true;
-                app.executeCommand(cmdID);
-                comp.layer(1).property("Transform").property("Anchor Point").setValue([2000,0]);
-                comp.layer(1).property("ADBE Transform Group").property("ADBE Position").setValue([128,0]);
-                comp.layer(1).property("ADBE Transform Group").property("ADBE Scale").setValue([8,8]);
+                // comp.openInViewer().setActive();
+                // comp.layer(1).selected = true;
+                // app.executeCommand(cmdID);
+                // comp.layer(1).property("Transform").property("Anchor Point").setValue([2000,0]);
+                // comp.layer(1).property("ADBE Transform Group").property("ADBE Position").setValue([128,0]);
+                // comp.layer(1).property("ADBE Transform Group").property("ADBE Scale").setValue([8,8]);
 
             }
-            // if(keyImage == undefined){
-            //     missingImages.push(name);
-            // }
-
+           
         }
 
         return
@@ -468,7 +402,7 @@ function alertMissingImages(){
     var imagename_array = [];
     var imagesFolder;
     for(var i = 1; i <= app.project.numItems; i++){
-        if(app.project.item(i).name == "003_Avatar Image Comps"){
+        if(app.project.item(i).name == imageCompFolderName){
             var imagesFolder = app.project.item(i);
             break
         }

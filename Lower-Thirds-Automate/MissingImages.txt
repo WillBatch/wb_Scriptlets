@@ -1,4 +1,24 @@
 Could not find matching images for the following:
 
+Amazon.png
+AppleTV.png
+Crunchyroll.png
+DiscoveryPlus.png
+Disney.png
+Funimation.png
+HBO Max.png
+Hulu.png
+Netflix.png
+NintendoSwitch.png
+Oculus.png
+Paramount.png
+PC.png
+Peacock.png
+PlayStationVR.png
+PS4.png
+PS5.png
+Stadia.png
+XboxOne.png
+XboxSeriesX.png
 
 Make sure the image file name matches the name on the talent ID.
