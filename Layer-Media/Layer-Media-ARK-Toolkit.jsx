@@ -208,11 +208,14 @@ function selectAutoTraces() {
     throw new Error("Please open a composition.");
   }
 
-  var searchString = "Auto";
+  var searchString = "auto";
   var foundLayers = [];
 
   for (var i = 1; i <= app.project.activeItem.numLayers; i++) {
-    if (app.project.activeItem.layer(i).name.search(searchString) != -1) {
+    if (
+      app.project.activeItem.layer(i).name.toLowerCase().search(searchString) !=
+      -1
+    ) {
       // foundLayers.push(app.project.activeItem.layer(i));
       app.project.activeItem.layer(i).selected = true;
     }
