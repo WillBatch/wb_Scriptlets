@@ -26,4 +26,3 @@ function compAreaMarkers(comp) {
 
   return;
 }
-1;
