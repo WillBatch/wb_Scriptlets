@@ -1,0 +1,12 @@
+var project = app.project;
+var selection_array = project.selection;
+
+getFileType(selection_array);
+
+function getFileType(file_array) {
+  for (var i = 0; i < file_array.length; i++) {
+    var fileType = file_array[i].name.split(".")[1];
+    alert(fileType);
+  }
+  return;
+}
