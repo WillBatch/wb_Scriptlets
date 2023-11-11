@@ -9,7 +9,7 @@ app.endUndoGroup();
 
 function renameComps() {
   for (var i = 1; i <= selectedComps.length; i++) {
-    selectedComps[i - 1].name = p + "_" + i;
+    selectedComps[i - 1].name += "_" + p;
     greenscreensetup(selectedComps[i - 1]);
   }
 }
