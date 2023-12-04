@@ -25,10 +25,10 @@ if (selectedFolder != false) {
 }
 
 //Adds Subfolders
-for (var i = 0; i < f10_array.length; i++) {
-  var subFolder10 = proj.items.addFolder(f10_array[i]);
-  subFolder10.parentFolder = folder10;
-}
+// for (var i = 0; i < f10_array.length; i++) {
+//   var subFolder10 = proj.items.addFolder(f10_array[i]);
+//   subFolder10.parentFolder = folder10;
+// }
 app.endUndoGroup;
 
 function getSelectedFolder(p) {
