@@ -1,0 +1,11 @@
+Each layer needs to be in its own comp. That comp needs to match the deliverable comp size (tyically will be 4K)
+
+Each layer needs to be set as a 3D layer. This includes all layers in pre-comps.
+
+Each layer needs to enabled motion blur. Since we're using infinite rasterization, we can't apply motion blur on the root level of the comp,
+so enabling it on each layer will enable motion blur
+
+Add the zspace expression to each comp layer:
+var camera = thisComp.layer("Camera 1");
+var zoom=camera.cameraOption.zoom;
+transform.scale*(1+transform.position[2]/zoom) 
