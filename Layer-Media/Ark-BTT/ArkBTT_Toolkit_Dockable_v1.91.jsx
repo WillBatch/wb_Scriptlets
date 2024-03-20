@@ -6,7 +6,7 @@
     var win =
       thisObj instanceof Panel
         ? thisObj
-        : new Window("palette", "Ark BTT Toolkit v1.8", undefined, {
+        : new Window("palette", "Ark BTT Toolkit v1.91", undefined, {
             resizeable: true,
           });
     win.spacing = 10;
@@ -550,27 +550,38 @@ function scribble(shapeLayerName) {
 function fixTextures(textureValue) {
   app.beginUndoGroup("fix texturize");
   var compItems = app.project.activeItem.numLayers;
+
   for (var i = 1; i <= compItems; i++) {
     var l = app.project.activeItem.layer(i);
-    if (hasTexturizeEffect(l)) {
-      // Run function if the layer has the "Texturize" effect
-      runIfTexturize(l, textureValue);
+
+    if (l instanceof AVLayer) {
+      if (hasTexturizeEffect(l)) {
+        // Run function if the layer has the "Texturize" effect
+        runIfTexturize(l, textureValue);
+      }
+    } else {
+      continue;
     }
   }
   app.endUndoGroup();
 }
 function hasTexturizeEffect(layer) {
   // Get all effects on the layer
+
   var effects = layer.property("ADBE Effect Parade");
 
   // Loop through effects to find "Texturize"
-  for (var i = 1; i <= effects.numProperties; i++) {
-    var effect = effects.property(i);
-    if (effect.matchName === "ADBE Texturize") {
-      return true;
+  if (effects.numProperties > 0) {
+    for (var i = 1; i <= effects.numProperties; i++) {
+      var effect = effects.property(i);
+      if (effect.matchName === "ADBE Texturize") {
+        return true;
+      }
     }
+    return false;
+  } else {
+    return;
   }
-  return false;
 }
 
 function runIfTexturize(layer, textureValue) {
