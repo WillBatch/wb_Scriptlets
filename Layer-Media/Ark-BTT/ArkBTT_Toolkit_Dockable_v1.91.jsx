@@ -50,7 +50,7 @@
     };
     var button7 = group1.add("button", undefined, "Tex");
     button7.onClick = function () {
-      fixTextures(1.2);
+      fixTextures(inputField3.text);
     };
     var help = group1.add("button", undefined, "?");
     help.preferredSize.width = help.graphics.measureString("?").width + 20; // Add some padding
@@ -103,6 +103,16 @@
       // Update the button text based on the lock state
       lockButton.text = lockState ? "Lock" : "Unlock";
     }
+
+    var inputField3 = group2.add("edittext", [10, 40, 40, 60], "1.2");
+    var button8 = group2.add("button", undefined, "pTime(15)");
+    button8.onClick = function () {
+      pTime(15);
+    };
+    var button9 = group2.add("button", undefined, "pTime(6)");
+    button9.onClick = function () {
+      pTime(6);
+    };
 
     win.onResizing = win.onResize = function () {
       this.layout.resize();
@@ -451,14 +461,20 @@ function boilmyshit() {
 function scribble(shapeLayerName) {
   app.beginUndoGroup("Scribble Matte");
 
+  if (app.project.activeItem.selectedLayers.length == 1) {
+    var selLayerName = "_" + app.project.activeItem.selectedLayers[0].name;
+  } else {
+    var selLayerName = "";
+  }
   // Run the main function
-  runCreateScribbleMatte();
+  runCreateScribbleMatte(selLayerName);
   app.endUndoGroup();
   // Main function to loop through all compositions in the project
   function runCreateScribbleMatte() {
     // Create a new shape layer
     var shapeLayer = app.project.activeItem.layers.addShape();
-    shapeLayer.name = shapeLayerName;
+
+    shapeLayer.name = shapeLayerName + selLayerName;
 
     // Create two points for the shape layer
     var startPoint = [0, 0];
@@ -591,4 +607,59 @@ function runIfTexturize(layer, textureValue) {
     .property("Texturize")
     .property("Texture Contrast")
     .setValue(textureValue);
+}
+function pTime(number) {
+  app.beginUndoGroup("ptime");
+  // Get the active composition
+  var comp = app.project.activeItem;
+
+  if (comp && comp instanceof CompItem) {
+    // Get the selected layers
+    var selectedLayers = comp.selectedLayers;
+
+    // Check if any layers are selected
+    if (selectedLayers.length > 0) {
+      // Get the first selected layer (you may adjust this based on your needs)
+      var selectedLayer = selectedLayers[0];
+
+      // Function to recursively find the last selected property
+      function getLastSelectedProperty(properties) {
+        var lastSelectedProperty = null;
+        for (var i = 1; i <= properties.numProperties; i++) {
+          var currentProperty = properties.property(i);
+          if (currentProperty.selected) {
+            lastSelectedProperty = currentProperty;
+            // If the property is a group, recursively check its children
+            if (currentProperty instanceof PropertyGroup) {
+              lastSelectedProperty = getLastSelectedProperty(currentProperty);
+            }
+          }
+          // If the property is not selected and is an effect group, recursively check its properties
+          else if (
+            currentProperty instanceof PropertyGroup &&
+            currentProperty.matchName === "ADBE Effect Parade"
+          ) {
+            lastSelectedProperty = getLastSelectedProperty(currentProperty);
+          }
+        }
+        return lastSelectedProperty;
+      }
+
+      // Get the last selected property
+      var lastSelectedProperty = getLastSelectedProperty(selectedLayer);
+
+      // Now you can use the lastSelectedProperty variable
+      if (lastSelectedProperty !== null) {
+        lastSelectedProperty.expression = "posterizeTime(" + number + ");value";
+      } else {
+        alert("No properties selected on the layer.");
+      }
+    } else {
+      alert("No layers selected in the composition.");
+    }
+  } else {
+    alert("No active composition found.");
+  }
+
+  app.endUndoGroup();
 }
