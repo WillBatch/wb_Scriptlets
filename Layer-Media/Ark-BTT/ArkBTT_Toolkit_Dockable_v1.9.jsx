@@ -549,11 +549,12 @@ function scribble(shapeLayerName) {
 // Main function to loop through all compositions in the project
 function fixTextures(textureValue) {
   app.beginUndoGroup("fix texturize");
-  var selected = app.project.activeItem.selectedLayers;
-  for (var i = 0; i < selected.length; i++) {
-    if (hasTexturizeEffect(selected[i])) {
+  var compItems = app.project.activeItem.numLayers;
+  for (var i = 1; i <= compItems; i++) {
+    var l = app.project.activeItem.layer(i);
+    if (hasTexturizeEffect(l)) {
       // Run function if the layer has the "Texturize" effect
-      runIfTexturize(selected[i], textureValue);
+      runIfTexturize(l, textureValue);
     }
   }
   app.endUndoGroup();
