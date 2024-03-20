@@ -40,15 +40,18 @@
     button4.onClick = function () {
       boilmyshit();
     };
-    var button5 = group1.add("button", undefined, "Scribble-Fill");
+    var button5 = group1.add("button", undefined, "Fill");
     button5.onClick = function () {
       scribble("fillMATTE");
     };
-    var button6 = group1.add("button", undefined, "Scribble-Lines");
+    var button6 = group1.add("button", undefined, "Line");
     button6.onClick = function () {
       scribble("lineMATTE");
     };
-
+    var button7 = group1.add("button", undefined, "Tex");
+    button7.onClick = function () {
+      fixTextures(1.2);
+    };
     var help = group1.add("button", undefined, "?");
     help.preferredSize.width = help.graphics.measureString("?").width + 20; // Add some padding
     help.onClick = function () {
@@ -514,10 +517,66 @@ function scribble(shapeLayerName) {
     var roughenEdges = shapeLayer
       .property("ADBE Effect Parade")
       .addProperty("ADBE Roughen Edges");
-    roughenEdges.property("ADBE Roughen Edges-0003").setValue = 10;
-    roughenEdges.property("ADBE Roughen Edges-0005").setValue = 10;
+    roughenEdges.property("ADBE Roughen Edges-0003").setValue(10);
+    roughenEdges.property("ADBE Roughen Edges-0005").setValue(10);
+
+    if (shapeLayerName == "fillMATTE") {
+      var strokeWidth = shapeLayer
+        .property("Contents")
+        .property("Group 1")
+        .property("Contents")
+        .property("ADBE Vector Graphic - Stroke")
+        .property("Stroke Width");
+      strokeWidth.setValuesAtTimes(
+        [currentTime + 0.45, currentTime + 1.95],
+        [50, 120]
+      );
+      strokeWidth.expression = "posterizeTime(15); value";
+      var key1 = strokeWidth.keyTime(1);
+      var key2 = strokeWidth.keyTime(2);
+      var easeInkey1 = new KeyframeEase(0, 10); // Ease in value and influence
+      var easeOutkey1 = new KeyframeEase(0.1, 30); // Ease out value and influence
+      var easeInkey2 = new KeyframeEase(0.1, 55); // Ease in value and influence
+      var easeOutkey2 = new KeyframeEase(0, 50); // Ease out value and influence
+      strokeWidth.setTemporalEaseAtKey(1, [easeInkey1], [easeOutkey1]);
+      strokeWidth.setTemporalEaseAtKey(2, [easeInkey2], [easeOutkey2]);
+    }
 
     // Select the shape layer
     shapeLayer.selected = true;
   }
+}
+// Main function to loop through all compositions in the project
+function fixTextures(textureValue) {
+  app.beginUndoGroup("fix texturize");
+  var selected = app.project.activeItem.selectedLayers;
+  for (var i = 0; i < selected.length; i++) {
+    if (hasTexturizeEffect(selected[i])) {
+      // Run function if the layer has the "Texturize" effect
+      runIfTexturize(selected[i], textureValue);
+    }
+  }
+  app.endUndoGroup();
+}
+function hasTexturizeEffect(layer) {
+  // Get all effects on the layer
+  var effects = layer.property("ADBE Effect Parade");
+
+  // Loop through effects to find "Texturize"
+  for (var i = 1; i <= effects.numProperties; i++) {
+    var effect = effects.property(i);
+    if (effect.matchName === "ADBE Texturize") {
+      return true;
+    }
+  }
+  return false;
+}
+
+function runIfTexturize(layer, textureValue) {
+  // Your code here
+  layer
+    .property("Effects")
+    .property("Texturize")
+    .property("Texture Contrast")
+    .setValue(textureValue);
 }
