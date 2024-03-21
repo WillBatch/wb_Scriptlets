@@ -267,7 +267,7 @@ function setupForm(comp, brush_stroke_comp, precompose_boolean) {
     var minimaxEffect = fill_layer
       .property("ADBE Effect Parade")
       .addProperty("ADBE Minimax");
-    minimaxEffect.property("ADBE Minimax-0002").setValue(6);
+    minimaxEffect.property("ADBE Minimax-0002").setValue(1);
 
     minimaxEffect.property("ADBE Minimax-0003").setValue(6);
     var fillEffect = fill_layer
