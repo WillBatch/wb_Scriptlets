@@ -6,7 +6,12 @@
 
 //Effects properties that we want to grab are going to be .propertyType == PropertyType.PROPERTY
 //An Effect like "Fill" is going to be PropertyType.NAMED_GROUP
-copypaste_effects_activecomp_MAIN(app.project.activeItem.selectedLayers[0]);
+
+// copypaste_effects_activecomp_MAIN(app.project.activeItem.selectedLayers[0]);
+
+var deepestSelectedProp = rd_GimmePropPath_findDeepestSelectedProp();
+alert(deepestSelectedProp.parentProperty.name);
+
 //ALL EFFECTS PROPERTIES ONLY
 function copypaste_effects_activecomp_MAIN(selectedLayer) {
   var selectedPropsObject_Effects = (function (layer, parentProp_matchName) {
@@ -87,4 +92,24 @@ function copypaste_effects_activecomp_MAIN(selectedLayer) {
       }
     }
   }
+}
+function rd_GimmePropPath_findDeepestSelectedProp() {
+  var comp = app.project.activeItem;
+  var deepestProp,
+    numDeepestProps = 0,
+    deepestPropDepth = 0;
+  var prop;
+
+  for (var i = 0; i < comp.selectedProperties.length; i++) {
+    prop = comp.selectedProperties[i];
+
+    if (prop.propertyDepth >= deepestPropDepth) {
+      if (prop.propertyDepth > deepestPropDepth) numDeepestProps = 0;
+      deepestProp = prop;
+      numDeepestProps++;
+      deepestPropDepth = prop.propertyDepth;
+    } else continue;
+  }
+
+  return numDeepestProps > 1 ? null : deepestProp;
 }
