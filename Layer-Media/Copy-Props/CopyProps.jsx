@@ -7,7 +7,10 @@ var allLayersInComp = true;
 // alert(selectedPropsObject_Effects.effect.name);
 
 app.beginUndoGroup("1");
-find_selected_properties_on_layer(app.project.activeItem.selectedLayers[0]);
+var selectedLayerProperties = find_selected_properties_on_layer(
+  app.project.activeItem.selectedLayers[0]
+);
+copy_selected_properties(selectedLayerProperties);
 app.endUndoGroup();
 
 function find_selected_properties_on_layer(layer) {
@@ -18,83 +21,132 @@ function find_selected_properties_on_layer(layer) {
       props_array.push(layer.selectedProperties[i]);
     }
   }
-
+  return props_array;
+}
+function copy_selected_properties(props_array) {
   for (var n = 0; n < props_array.length; n++) {
-    var propertyPathProps = buildPropPath(props_array[n]);
+    var propertyPathProps = get_selected_property_to_search(props_array[n]);
     if (allLayersInComp === true) {
       for (var m = 1; m <= comp.numLayers; m++) {
-        var foundProperty = findPropertyByPath(
+        var foundProperty = find_layer_property_by_matchName(
           comp.layer(m),
-          propertyPathProps
+          propertyPathProps,
+          app.project.activeItem.selectedLayers[0]
         );
         if (foundProperty) {
+          clearExpression(foundProperty);
           copyValue(props_array[n].value, foundProperty);
           copyExpression(props_array[n], foundProperty);
+          copyKeyframes(props_array[n], foundProperty);
         }
-      }
-    }
-    // copyValue(props_array[n].value, foundProperty);
-  }
-  function buildPropPath(prop) {
-    var propPath = []; // Initialize an array to store the property path
-    var currentProp = prop; // Start with the given property
-
-    // Traverse backward through the parentProperty chain until reaching the root level
-    while (currentProp.parentProperty !== null) {
-      propPath.unshift(currentProp.matchName); // Add the matchName of the current property to the beginning of the array
-      currentProp = currentProp.parentProperty; // Move to the parent property
-    }
-    // Add the root property's name (usually the property of the layer) to the path
-    //   propPath.unshift(currentProp.name);
-
-    // Join the elements of the array to form the complete property path
-    return propPath; // Return the built property path
-  }
-  function findPropertyByPath(layer, propertyPathProps) {
-    var currentLayer = layer; // Start with the given layer
-
-    // Traverse down the property path on the layer
-    for (var i = 0; i < propertyPathProps.length; i++) {
-      var propertyName = propertyPathProps[i];
-
-      // Find the property with the current matchName on the current layer
-      var foundProperty = null;
-      for (var j = 1; j <= currentLayer.numProperties; j++) {
-        var property = currentLayer.property(j);
-        if (property.matchName === propertyName) {
-          foundProperty = property;
-          break;
-        }
-      }
-
-      // If the property is found and it's not the last property in the path, move to its child property
-      if (foundProperty !== null && i < propertyPathProps.length - 1) {
-        currentLayer = foundProperty;
-      } else {
-        return foundProperty; // Return the found property
-      }
-    }
-
-    return null; // Return null if the property is not found
-  }
-  function copyValue(propToCopy, prop) {
-    try {
-      prop.setValue(propToCopy);
-    } catch (err) {
-      null;
-    }
-  }
-  function copyExpression(propToCopy, prop) {
-    if (propToCopy.expressionEnabled) {
-      try {
-        prop.expression = propToCopy.expression;
-      } catch (err) {
-        null;
       }
     }
   }
 }
+function get_selected_property_to_search(prop) {
+  var propPath = []; // Initialize an array to store the property path
+  var currentProp = prop; // Start with the given property
 
+  // Traverse backward through the parentProperty chain until reaching the root level
+  while (currentProp.parentProperty !== null) {
+    propPath.unshift(currentProp.matchName); // Add the matchName of the current property to the beginning of the array
+    currentProp = currentProp.parentProperty; // Move to the parent property
+  }
+
+  return propPath; // Return the built property path
+}
+function find_layer_property_by_matchName(
+  layer,
+  propertyPathProps,
+  selectedLayer
+) {
+  var currentLayer = layer; // Start with the given layer
+  if (
+    currentLayer.name === selectedLayer.name &&
+    currentLayer.index === selectedLayer.index
+  ) {
+    return null;
+  }
+
+  // Traverse down the property path on the layer
+  for (var i = 0; i < propertyPathProps.length; i++) {
+    var propertyName = propertyPathProps[i];
+
+    // Find the property with the current matchName on the current layer
+    var foundProperty = null;
+    for (var j = 1; j <= currentLayer.numProperties; j++) {
+      var property = currentLayer.property(j);
+      if (property.matchName === propertyName) {
+        foundProperty = property;
+        break;
+      }
+    }
+
+    // If the property is found and it's not the last property in the path, move to its child property
+    if (foundProperty !== null && i < propertyPathProps.length - 1) {
+      currentLayer = foundProperty;
+    } else {
+      return foundProperty; // Return the found property
+    }
+  }
+
+  return null; // Return null if the property is not found
+}
+function copyValue(propToCopy, prop) {
+  try {
+    clearKeyframes(prop);
+    prop.setValue(propToCopy);
+  } catch (err) {
+    null;
+  }
+}
+function copyExpression(propToCopy, prop) {
+  if (propToCopy.expressionEnabled) {
+    try {
+      prop.expression = propToCopy.expression;
+    } catch (err) {
+      null;
+    }
+  }
+}
+function copyKeyframes(propToCopy, prop) {
+  if (propToCopy.numKeys > 0) {
+    try {
+      clearKeyframes(prop);
+      // Copy keyframes from 'propToCopy' to 'prop'
+      for (var i = 1; i <= propToCopy.numKeys; i++) {
+        // Get keyframe value and time from 'propToCopy'
+        var keyframeValue = propToCopy.keyValue(i);
+        var keyframeTime = propToCopy.keyTime(i);
+
+        // Add keyframe to 'prop' with the same value and time
+        prop.setValueAtTime(keyframeTime, keyframeValue);
+      }
+    } catch (err) {
+      null;
+    }
+  }
+}
+function clearKeyframes(prop) {
+  // Clear existing keyframes in 'prop'
+  if (prop.numKeys > 0) {
+    var n = prop.numKeys;
+    while (n >= 1) {
+      prop.removeKey(n);
+      // Decrement n for the next iteration
+      n--;
+    }
+  }
+}
+function clearExpression(prop) {
+  if (prop.expressionEnabled) {
+    try {
+      prop.expression = "";
+    } catch (err) {
+      null;
+    }
+  }
+}
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
