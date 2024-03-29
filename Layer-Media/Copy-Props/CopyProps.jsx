@@ -1,17 +1,53 @@
+(function (thisObj) {
+  scriptBuildUI(thisObj);
+  function scriptBuildUI(thisObj) {
+    var win =
+      thisObj instanceof Panel
+        ? thisObj
+        : new Window("palette", "Render Buddy", undefined, {
+            resizeable: true,
+          });
+    win.spacing = 0;
+    win.orientation = "column";
+
+    var group1 = win.add("group"); // Create a group for the first row
+    group1.orientation = "row"; // Set the group orientation to "row"
+    group1.spacing = 3;
+    var button_StoreSelectedPropertiesData = group1.add(
+      "button",
+      undefined,
+      "Store"
+    );
+    button_StoreSelectedPropertiesData.size = [70, 20];
+    button_StoreSelectedPropertiesData.onClick = function () {
+      ///function goes here
+      store_selected_properties_data(app.project.activeItem.selectedLayers[0]);
+    };
+
+    win.onResizing = win.onResize = function () {
+      this.layout.resize();
+    };
+
+    win instanceof Window
+      ? (win.center(), win.show())
+      : (win.layout.layout(true), win.layout.resize());
+  }
+})(this);
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 var comp = app.project.activeItem;
 var layer = comp.selectedLayers[0];
 var layerProps = layer.numProperties;
 var newLayer = app.project.activeItem.layer(1); //temp layer
 var allLayersInComp = true;
 
-// alert(selectedPropsObject_Effects.effect.name);
-
-app.beginUndoGroup("1");
-var selectedLayerProperties = find_selected_properties_on_layer(
-  app.project.activeItem.selectedLayers[0]
-);
-copy_selected_properties(selectedLayerProperties);
-app.endUndoGroup();
+// app.beginUndoGroup("1");
+// var selectedLayerProperties = find_selected_properties_on_layer(
+//   app.project.activeItem.selectedLayers[0]
+// );
+// copy_selected_properties(selectedLayerProperties);
+// app.endUndoGroup();
 
 function find_selected_properties_on_layer(layer) {
   //Get all selected properties on the layer
@@ -58,12 +94,12 @@ function get_selected_property_to_search(prop) {
 function find_layer_property_by_matchName(
   layer,
   propertyPathProps,
-  selectedLayer
+  layerToSkip
 ) {
   var currentLayer = layer; // Start with the given layer
   if (
-    currentLayer.name === selectedLayer.name &&
-    currentLayer.index === selectedLayer.index
+    currentLayer.name === layerToSkip.name &&
+    currentLayer.index === layerToSkip.index
   ) {
     return null;
   }
@@ -152,6 +188,12 @@ function clearExpression(prop) {
     } catch (err) {
       null;
     }
+  }
+}
+function store_selected_properties_data(layer) {
+  var props_array = find_selected_properties_on_layer(layer);
+  for (var n = 0; n < props_array.length; n++) {
+    var propertyPathProps = get_selected_property_to_search(props_array[n]);
   }
 }
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
