@@ -144,7 +144,9 @@ var grey600 = [176, 176, 176];
 
     button_StoreSelectedPropertiesData.onClick = function () {
       ///function goes here
-      if (app.project.activeItem.selectedLayers[0]) {
+      if (
+        app.project.activeItem.selectedLayers[0].selectedProperties.length !== 0
+      ) {
         var updateData = store_selected_properties_data(
           app.project.activeItem.selectedLayers[0]
         );
@@ -173,10 +175,12 @@ var grey600 = [176, 176, 176];
         selectedPropertyData !== null &&
         app.project.activeItem.selectedLayers.length !== 0
       ) {
+        app.beginUndoGroup("Paste");
         paste_selected_properties_data(
           app.project.activeItem.selectedLayers,
           dropdown_PasteToOption.selection.index
         );
+        app.endUndoGroup();
         // Change button text to "Pasted!"
         // this.text = "Pasted!";
 
@@ -189,6 +193,28 @@ var grey600 = [176, 176, 176];
         alert("Select some layers");
       }
     };
+    var button_AlertStoredProperties = new FancyButton(
+      group1,
+      {
+        width: 20,
+        height: 20,
+        text: ":)",
+        color: grey100,
+        strokeWidth: 2,
+        strokeColor: grey600,
+      },
+      false,
+      true
+    );
+    button_AlertStoredProperties.onClick = function () {
+      if (selectedPropertyData !== null) {
+        // alert(selectedPropertyData[0].propData.name);
+        display_prop_names(selectedPropertyData);
+      } else {
+        alert("No properties ready to paste");
+      }
+    };
+
     var staticText_CopyTo = group2.add("statictext", undefined, "Paste to");
     var dropdown_PasteToOption_array = [
       "Selected Layers",
@@ -260,7 +286,7 @@ function copy_selected_properties(props_array) {
     }
   }
 }
-function get_selected_property_to_search(prop) {
+function get_selected_property_to_search(prop, layer) {
   var propertyPath = []; // Initialize an array to store the property path
   var propertyData = {}; // Initialize an object to store the property data
   var currentProp = prop; // Start with the given property
@@ -289,7 +315,7 @@ function get_selected_property_to_search(prop) {
     }
   }
 
-  return { propPath: propertyPath, propData: propertyData }; // Return the built property path
+  return { propPath: propertyPath, propData: propertyData, propLayer: layer }; // Return the built property path
 }
 function find_layer_property_by_matchName(
   layer,
@@ -397,7 +423,8 @@ function store_selected_properties_data(layer) {
   selectedPropertyData = []; // Initialize selectedPropertyData as an array
   for (var n = 0; n < props_array.length; n++) {
     var selectedProperty_Object = get_selected_property_to_search(
-      props_array[n]
+      props_array[n],
+      layer
     );
     selectedPropertyData.push(selectedProperty_Object); // Store each selected property object in selectedPropertyData array
   }
@@ -419,145 +446,163 @@ function paste_selected_properties_data(
         loopInteger = 0;
         loopCondition = selectedLayers.length;
         loopLayers = selectedLayers; //An Array
+        loop_through_and_paste_properties();
         break;
       case 1:
-        alert("1");
+        loopInteger = 1;
+        loopCondition = app.project.activeItem.numLayers + 1;
+        loopLayers = app.project.activeItem; //An Array
+        loop_through_and_paste_properties();
         break;
       case 2:
-        alert("2");
+        var proj = app.project;
+        for (var j = 1; j <= proj.numItems; j++) {
+          var compItem = proj.item(j);
+          if (compItem instanceof CompItem) {
+            // If item is a composition
+            loopInteger = 1;
+            loopCondition = compItem.numLayers + 1;
+            loopLayers = compItem;
+            loop_through_and_paste_properties();
+          }
+        }
         break;
     }
-    for (var m = 0; m < selectedLayers.length; m++) {
-      var foundProperty = find_layer_property_by_matchName(
-        selectedLayers[m],
-        propertyPathProps,
-        null
-      );
-      if (foundProperty) {
-        clearExpression(foundProperty);
-        copyValue(propertyPathData.value, foundProperty);
-        copyExpression(propertyPathData.prop, foundProperty);
-        // copyKeyframes(props_array[n], foundProperty);
+    function loop_through_and_paste_properties() {
+      for (var m = loopInteger; m < loopCondition; m++) {
+        var loopLayer_forLoop;
+        if (loopLayers instanceof Array) {
+          loopLayer_forLoop = loopLayers[m];
+        } else {
+          loopLayer_forLoop = loopLayers.layer(m);
+        }
+        var foundProperty = find_layer_property_by_matchName(
+          loopLayer_forLoop,
+          propertyPathProps,
+          null
+        );
+        if (foundProperty) {
+          clearExpression(foundProperty);
+          copyValue(propertyPathData.value, foundProperty);
+          copyExpression(propertyPathData.prop, foundProperty);
+          // copyKeyframes(props_array[n], foundProperty);
+        }
       }
     }
   }
   //   alert(selectedPropertyData[0].propData.name);
 }
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//OLD CODE//
-//Effects properties that we want to grab are going to be .propertyType == PropertyType.PROPERTY
-//An Effect like "Fill" is going to be PropertyType.NAMED_GROUP
-// copypaste_effects_activecomp_MAIN(app.project.activeItem.selectedLayers[0]);
-// var deepestSelectedProp = rd_GimmePropPath_findDeepestSelectedProp();
-//ALL EFFECTS PROPERTIES ONLY
-function copypaste_effects_activecomp_MAIN(selectedLayer) {
-  var selectedPropsObject_Effects = (function (layer, parentProp_matchName) {
-    //First we need to separate the selected Effect (like "Fill") from the specific properties selected like "Color"
-    var selectedProps = [];
-    var selectedLayerEffect = null;
-    var layerProps_Effects = layer.property(parentProp_matchName);
-    for (var i = 1; i <= layerProps_Effects.numProperties; i++) {
-      //Loop through all Effects Properties to find which are selected
-      if (layerProps_Effects.property(i).selected === true) {
-        selectedLayerEffect = layerProps_Effects.property(i);
-        for (var j = 1; j <= selectedLayerEffect.numProperties; j++) {
-          if (
-            selectedLayerEffect.property(j).selected === true &&
-            selectedLayerEffect.property(j).propertyType ===
-              PropertyType.PROPERTY
-          ) {
-            selectedProps.push(selectedLayerEffect.property(j));
-          }
-        }
-      }
-    }
-    //   alert(selectedLayerEffect.name);
-    return { props: selectedProps, effect: selectedLayerEffect };
-  })(selectedLayer, "ADBE Effect Parade");
-
-  app.beginUndoGroup("Copy");
-  copypaste_effects_activecomp(
-    app.project.activeItem,
-    selectedPropsObject_Effects,
-    "matchName"
-  );
-  app.endUndoGroup();
-
-  //Scan ACTIVE COMP and update effects based on new values
-  function copypaste_effects_activecomp(comp, propsObject, searchType) {
-    //   First we need to find the layers that have the same effect using matchName
-    var searchEffectProperty = propsObject.effect;
-    for (var i = 1; i <= comp.numLayers; i++) {
-      if (comp.layer(i).property("ADBE Effect Parade").numProperties > 0) {
-        searchlayer = comp.layer(i);
-        var matchingProperty = searchLayerEffects_matchName(
-          searchlayer,
-          searchEffectProperty.matchName
-        );
-        if (matchingProperty) {
-          for (var n = 0; n < propsObject.props.length; n++) {
-            copypaste_PropertyTypePROPERTY(
-              matchingProperty,
-              propsObject.props[n]
-            );
-          }
-        }
-      }
-    }
-    alert("Copied!");
-    return;
-  }
-  function searchLayerEffects_matchName(layer, search_matchName) {
-    for (
-      var i = 1;
-      i <= layer.property("ADBE Effect Parade").numProperties;
-      i++
-    ) {
-      if (
-        layer.property("ADBE Effect Parade").property(i).matchName ===
-        search_matchName
-      ) {
-        return layer.property("ADBE Effect Parade").property(i); // Return true if match found
-      }
-    }
-    return null; // Return false if no match found after checking all properties
-  }
-  function copypaste_PropertyTypePROPERTY(layerProperty, propsToCopy) {
-    for (var i = 1; i <= layerProperty.numProperties; i++) {
-      if (layerProperty.property(i).matchName == propsToCopy.matchName) {
-        layerProperty.property(i).setValue(propsToCopy.value);
-      }
-    }
-  }
-}
-
-function rd_GimmePropPath_findDeepestSelectedProp() {
-  var comp = app.project.activeItem;
-  var deepestProp,
-    numDeepestProps = 0,
-    deepestPropDepth = 0;
-  var prop;
-
-  for (var i = 0; i < comp.selectedProperties.length; i++) {
-    prop = comp.selectedProperties[i];
-
-    if (prop.propertyDepth >= deepestPropDepth) {
-      if (prop.propertyDepth > deepestPropDepth) numDeepestProps = 0;
-      deepestProp = prop;
-      numDeepestProps++;
-      deepestPropDepth = prop.propertyDepth;
-    } else continue;
-  }
-
-  return numDeepestProps > 1 ? null : deepestProp;
-}
-// display_prop_names(props_array);
 function display_prop_names(props_array) {
-  var myAlert = "\n";
+  var myAlert =
+    "Stored Properties on layer: " + props_array[0].propLayer.name + "\n";
   for (var m = 0; m < props_array.length; m++) {
-    myAlert += props_array[m].name + "\n";
+    myAlert +=
+      props_array[m].propData.name +
+      " = " +
+      props_array[m].propData.value.toString() +
+      "\n";
   }
   alert(myAlert);
 }
+
+// function copypaste_effects_activecomp_MAIN(selectedLayer) {
+//   var selectedPropsObject_Effects = (function (layer, parentProp_matchName) {
+//     //First we need to separate the selected Effect (like "Fill") from the specific properties selected like "Color"
+//     var selectedProps = [];
+//     var selectedLayerEffect = null;
+//     var layerProps_Effects = layer.property(parentProp_matchName);
+//     for (var i = 1; i <= layerProps_Effects.numProperties; i++) {
+//       //Loop through all Effects Properties to find which are selected
+//       if (layerProps_Effects.property(i).selected === true) {
+//         selectedLayerEffect = layerProps_Effects.property(i);
+//         for (var j = 1; j <= selectedLayerEffect.numProperties; j++) {
+//           if (
+//             selectedLayerEffect.property(j).selected === true &&
+//             selectedLayerEffect.property(j).propertyType ===
+//               PropertyType.PROPERTY
+//           ) {
+//             selectedProps.push(selectedLayerEffect.property(j));
+//           }
+//         }
+//       }
+//     }
+//     //   alert(selectedLayerEffect.name);
+//     return { props: selectedProps, effect: selectedLayerEffect };
+//   })(selectedLayer, "ADBE Effect Parade");
+
+//   app.beginUndoGroup("Copy");
+//   copypaste_effects_activecomp(
+//     app.project.activeItem,
+//     selectedPropsObject_Effects,
+//     "matchName"
+//   );
+//   app.endUndoGroup();
+
+//   //Scan ACTIVE COMP and update effects based on new values
+//   function copypaste_effects_activecomp(comp, propsObject, searchType) {
+//     //   First we need to find the layers that have the same effect using matchName
+//     var searchEffectProperty = propsObject.effect;
+//     for (var i = 1; i <= comp.numLayers; i++) {
+//       if (comp.layer(i).property("ADBE Effect Parade").numProperties > 0) {
+//         searchlayer = comp.layer(i);
+//         var matchingProperty = searchLayerEffects_matchName(
+//           searchlayer,
+//           searchEffectProperty.matchName
+//         );
+//         if (matchingProperty) {
+//           for (var n = 0; n < propsObject.props.length; n++) {
+//             copypaste_PropertyTypePROPERTY(
+//               matchingProperty,
+//               propsObject.props[n]
+//             );
+//           }
+//         }
+//       }
+//     }
+//     alert("Copied!");
+//     return;
+//   }
+//   function searchLayerEffects_matchName(layer, search_matchName) {
+//     for (
+//       var i = 1;
+//       i <= layer.property("ADBE Effect Parade").numProperties;
+//       i++
+//     ) {
+//       if (
+//         layer.property("ADBE Effect Parade").property(i).matchName ===
+//         search_matchName
+//       ) {
+//         return layer.property("ADBE Effect Parade").property(i); // Return true if match found
+//       }
+//     }
+//     return null; // Return false if no match found after checking all properties
+//   }
+//   function copypaste_PropertyTypePROPERTY(layerProperty, propsToCopy) {
+//     for (var i = 1; i <= layerProperty.numProperties; i++) {
+//       if (layerProperty.property(i).matchName == propsToCopy.matchName) {
+//         layerProperty.property(i).setValue(propsToCopy.value);
+//       }
+//     }
+//   }
+// }
+
+// function rd_GimmePropPath_findDeepestSelectedProp() {
+//   var comp = app.project.activeItem;
+//   var deepestProp,
+//     numDeepestProps = 0,
+//     deepestPropDepth = 0;
+//   var prop;
+
+//   for (var i = 0; i < comp.selectedProperties.length; i++) {
+//     prop = comp.selectedProperties[i];
+
+//     if (prop.propertyDepth >= deepestPropDepth) {
+//       if (prop.propertyDepth > deepestPropDepth) numDeepestProps = 0;
+//       deepestProp = prop;
+//       numDeepestProps++;
+//       deepestPropDepth = prop.propertyDepth;
+//     } else continue;
+//   }
+
+//   return numDeepestProps > 1 ? null : deepestProp;
+// }
