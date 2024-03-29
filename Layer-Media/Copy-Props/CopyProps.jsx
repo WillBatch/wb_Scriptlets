@@ -109,16 +109,24 @@
       var textSize = g.measureString(button.text);
 
       button.onDraw = function () {
-        drawRoundedRect(
-          g,
-          fillBrush,
-          this.width,
-          this.height,
-          15,
-          0,
-          0,
-          strokePen
+        var blueBrush = g.newBrush(g.BrushType.SOLID_COLOR, [
+          0 / 255,
+          152 / 255,
+          255 / 255,
+          1,
+        ]);
+        var blackPen = g.newPen(
+          g.PenType.SOLID_COLOR,
+          [0 / 255, 0 / 255, 0 / 255, 1],
+          1
         );
+        var textSize = g.measureString(button.text);
+        var textX = (this.size.width - textSize.width) / 2;
+        var textY = (this.size.height - textSize.height) / 2;
+        g.newPath();
+        g.rectPath(0, 0, this.size.width, this.size.height);
+        g.fillPath(fillBrush);
+        g.strokePath(strokePen);
         g.drawString(
           button.text,
           textPen,
@@ -128,46 +136,6 @@
         // Draw the border stroke
         // g.drawRoundRect(0, 0, this.width, this.height, 15, strokePen);
       };
-    }
-
-    function drawRoundedRect(g, brush, width, height, corner, x, y, strokePen) {
-      g.newPath();
-      g.ellipsePath(x, y, corner, corner);
-      g.fillPath(brush);
-      g.ellipsePath(width - x - corner, y, corner, corner);
-      g.fillPath(brush);
-      g.ellipsePath(width - x - corner, height - y - corner, corner, corner);
-      g.fillPath(brush);
-      g.ellipsePath(x, height - y - corner, corner, corner);
-      g.fillPath(brush);
-      g.newPath();
-      var coords = [
-        x,
-        y + corner / 2,
-        x + corner / 2,
-        y,
-        width - x - corner / 2,
-        y,
-        width - x,
-        y + corner / 2,
-        width - x,
-        height - y - corner / 2,
-        width - x - corner / 2,
-        height - y,
-        x + corner / 2,
-        height - y,
-        x,
-        height - y - corner / 2,
-      ];
-      for (var i = 0; i <= coords.length - 1; i += 2) {
-        if (i === 0) {
-          g.moveTo(coords[i], coords[i + 1]);
-        } else {
-          g.lineTo(coords[i], coords[i + 1]);
-        }
-      }
-      g.fillPath(brush);
-      g.strokePath(strokePen);
     }
 
     var button_StoreSelectedPropertiesData = new FancyButton(
