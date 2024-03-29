@@ -13,28 +13,212 @@
     var group1 = win.add("group"); // Create a group for the first row
     group1.orientation = "row"; // Set the group orientation to "row"
     group1.spacing = 3;
-    var button_StoreSelectedPropertiesData = group1.add(
-      "button",
-      undefined,
-      "Store"
+
+    function FancyButton(
+      parentGroup,
+      params,
+      changeColorState_Fill,
+      changeColorState_Stroke,
+      strokeColor,
+      strokeWidth
+    ) {
+      var button = parentGroup.add("customButton", undefined, "");
+      button.width = params.width;
+      button.height = params.height;
+      button.text = params.text;
+      button.color = params.color;
+
+      button.preferredSize.height = button.height;
+      button.preferredSize.width = button.width;
+
+      button.addEventListener("mouseover", function () {
+        drawFancyButton(
+          button,
+          true,
+          changeColorState_Fill,
+          changeColorState_Stroke,
+          strokeColor,
+          strokeWidth
+        );
+      });
+      button.addEventListener("mouseout", function () {
+        drawFancyButton(
+          button,
+          false,
+          changeColorState_Fill,
+          changeColorState_Stroke,
+          strokeColor,
+          strokeWidth
+        );
+      });
+      drawFancyButton(
+        button,
+        false,
+        changeColorState_Fill,
+        changeColorState_Stroke,
+        strokeColor,
+        strokeWidth
+      );
+
+      return button;
+    }
+    function drawFancyButton(
+      button,
+      hover,
+      changeColorState_Fill,
+      changeColorState_Stroke,
+      strokeColor,
+      strokeWidth
+    ) {
+      var g = button.graphics;
+      var fillBrush;
+      var changeColorState;
+
+      fillBrush = g.newBrush(g.BrushType.SOLID_COLOR, [
+        button.color[0] / 255,
+        button.color[1] / 255,
+        button.color[2] / 255,
+        1,
+      ]);
+
+      // Create a stroke pen
+      var strokePen = g.newPen(
+        g.PenType.SOLID_COLOR,
+        [strokeColor[0] / 255, strokeColor[1] / 255, strokeColor[2] / 255, 1], // Stroke color
+        strokeWidth // Stroke width
+      );
+
+      if (changeColorState_Fill === true || changeColorState_Stroke === true) {
+        changeColorState = true;
+      }
+
+      var textPen; // <-- new textPen variable
+      if (hover) {
+        textPen = g.newPen(
+          g.PenType.SOLID_COLOR,
+          [255 / 255, 255 / 255, 255 / 255, 1],
+          1
+        ); // <-- define textPen when hover is true
+      } else {
+        textPen = g.newPen(
+          g.PenType.SOLID_COLOR,
+          [0 / 255, 0 / 255, 0 / 255, 1],
+          1
+        ); // <-- define textPen when hover is false
+      }
+      var textSize = g.measureString(button.text);
+
+      button.onDraw = function () {
+        drawRoundedRect(
+          g,
+          fillBrush,
+          this.width,
+          this.height,
+          15,
+          0,
+          0,
+          strokePen
+        );
+        g.drawString(
+          button.text,
+          textPen,
+          (this.width - textSize.width) / 2,
+          (this.height - textSize.height) / 2
+        );
+        // Draw the border stroke
+        // g.drawRoundRect(0, 0, this.width, this.height, 15, strokePen);
+      };
+    }
+
+    function drawRoundedRect(g, brush, width, height, corner, x, y, strokePen) {
+      g.newPath();
+      g.ellipsePath(x, y, corner, corner);
+      g.fillPath(brush);
+      g.ellipsePath(width - x - corner, y, corner, corner);
+      g.fillPath(brush);
+      g.ellipsePath(width - x - corner, height - y - corner, corner, corner);
+      g.fillPath(brush);
+      g.ellipsePath(x, height - y - corner, corner, corner);
+      g.fillPath(brush);
+      g.newPath();
+      var coords = [
+        x,
+        y + corner / 2,
+        x + corner / 2,
+        y,
+        width - x - corner / 2,
+        y,
+        width - x,
+        y + corner / 2,
+        width - x,
+        height - y - corner / 2,
+        width - x - corner / 2,
+        height - y,
+        x + corner / 2,
+        height - y,
+        x,
+        height - y - corner / 2,
+      ];
+      for (var i = 0; i <= coords.length - 1; i += 2) {
+        if (i === 0) {
+          g.moveTo(coords[i], coords[i + 1]);
+        } else {
+          g.lineTo(coords[i], coords[i + 1]);
+        }
+      }
+      g.fillPath(brush);
+      g.strokePath(strokePen);
+    }
+
+    var button_StoreSelectedPropertiesData = new FancyButton(
+      group1,
+      {
+        width: 80,
+        height: 20,
+        text: "Store",
+        color: [0, 152, 255],
+      },
+      true,
+      false,
+      [255, 255, 255],
+      3
     );
-    button_StoreSelectedPropertiesData.size = [70, 20];
+
+    // Function to update button label
+    function updateButtonLabel() {
+      if (selectedPropertyData !== null) {
+        button_StoreSelectedPropertiesData.text = "Stored";
+        button_StoreSelectedPropertiesData.color = [150, 0, 0];
+      } else {
+        button_StoreSelectedPropertiesData.text = "Store";
+      }
+    }
+
     button_StoreSelectedPropertiesData.onClick = function () {
       ///function goes here
       if (app.project.activeItem.selectedLayers[0]) {
         store_selected_properties_data(
           app.project.activeItem.selectedLayers[0]
         );
+        updateButtonLabel();
       } else {
         alert("Select some properties");
       }
     };
-    var button_PasteStoredPropertiesData = group1.add(
-      "button",
-      undefined,
-      "Paste"
+
+    var button_PasteStoredPropertiesData = new FancyButton(
+      group1,
+      {
+        width: 80,
+        height: 20,
+        text: "Paste",
+        color: [0, 152, 255],
+      },
+      false,
+      true,
+      [255, 0, 0],
+      1
     );
-    button_PasteStoredPropertiesData.size = [70, 20];
     button_PasteStoredPropertiesData.onClick = function () {
       if (
         selectedPropertyData !== null &&
@@ -117,6 +301,7 @@ function get_selected_property_to_search(prop) {
     currentProp = currentProp.parentProperty; // Move to the parent property
   }
   // Store property data
+  propertyData.prop = prop;
   propertyData.name = prop.name;
   propertyData.matchName = prop.matchName;
   propertyData.value = prop.value;
@@ -251,7 +436,7 @@ function paste_selected_properties_data(selectedLayers) {
   for (var n = 0; n < selectedPropertyData.length; n++) {
     var propertyPathProps = selectedPropertyData[n].propPath;
     var propertyPathData = selectedPropertyData[n].propData;
-
+    // alert(propertyPathData.prop.expression);
     for (var m = 0; m < selectedLayers.length; m++) {
       var foundProperty = find_layer_property_by_matchName(
         selectedLayers[m],
@@ -261,7 +446,7 @@ function paste_selected_properties_data(selectedLayers) {
       if (foundProperty) {
         clearExpression(foundProperty);
         copyValue(propertyPathData.value, foundProperty);
-        // copyExpression(props_array[n], foundProperty);
+        copyExpression(propertyPathData.prop, foundProperty);
         // copyKeyframes(props_array[n], foundProperty);
       }
     }
