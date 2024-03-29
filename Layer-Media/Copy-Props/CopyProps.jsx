@@ -4,7 +4,7 @@
     var win =
       thisObj instanceof Panel
         ? thisObj
-        : new Window("palette", "Render Buddy", undefined, {
+        : new Window("palette", "Copy Cat", undefined, {
             resizeable: true,
           });
     win.spacing = 0;
@@ -21,9 +21,34 @@
     button_StoreSelectedPropertiesData.size = [70, 20];
     button_StoreSelectedPropertiesData.onClick = function () {
       ///function goes here
-      store_selected_properties_data(app.project.activeItem.selectedLayers[0]);
+      if (app.project.activeItem.selectedLayers[0]) {
+        store_selected_properties_data(
+          app.project.activeItem.selectedLayers[0]
+        );
+      } else {
+        alert("Select some properties");
+      }
     };
-
+    var button_PasteStoredPropertiesData = group1.add(
+      "button",
+      undefined,
+      "Paste"
+    );
+    button_PasteStoredPropertiesData.size = [70, 20];
+    button_PasteStoredPropertiesData.onClick = function () {
+      if (
+        selectedPropertyData !== null &&
+        app.project.activeItem.selectedLayers.length !== 0
+      ) {
+        paste_selected_properties_data(app.project.activeItem.selectedLayers);
+      }
+      if (selectedPropertyData === null) {
+        alert("No stored data");
+      }
+      if (app.project.activeItem.selectedLayers.length === 0) {
+        alert("Select some layers");
+      }
+    };
     win.onResizing = win.onResize = function () {
       this.layout.resize();
     };
@@ -36,11 +61,13 @@
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-var comp = app.project.activeItem;
-var layer = comp.selectedLayers[0];
-var layerProps = layer.numProperties;
-var newLayer = app.project.activeItem.layer(1); //temp layer
-var allLayersInComp = true;
+// Define a variable to store the selected property data
+var selectedPropertyData = null;
+// var comp = app.project.activeItem;
+// var layer = comp.selectedLayers[0];
+// var layerProps = layer.numProperties;
+// var newLayer = app.project.activeItem.layer(1); //temp layer
+// var allLayersInComp = true;
 
 // app.beginUndoGroup("1");
 // var selectedLayerProperties = find_selected_properties_on_layer(
@@ -66,7 +93,7 @@ function copy_selected_properties(props_array) {
       for (var m = 1; m <= comp.numLayers; m++) {
         var foundProperty = find_layer_property_by_matchName(
           comp.layer(m),
-          propertyPathProps,
+          propertyPathProps.propPath,
           app.project.activeItem.selectedLayers[0]
         );
         if (foundProperty) {
@@ -80,16 +107,34 @@ function copy_selected_properties(props_array) {
   }
 }
 function get_selected_property_to_search(prop) {
-  var propPath = []; // Initialize an array to store the property path
+  var propertyPath = []; // Initialize an array to store the property path
+  var propertyData = {}; // Initialize an object to store the property data
   var currentProp = prop; // Start with the given property
 
   // Traverse backward through the parentProperty chain until reaching the root level
   while (currentProp.parentProperty !== null) {
-    propPath.unshift(currentProp.matchName); // Add the matchName of the current property to the beginning of the array
+    propertyPath.unshift(currentProp.matchName); // Add the matchName of the current property to the beginning of the array
     currentProp = currentProp.parentProperty; // Move to the parent property
   }
+  // Store property data
+  propertyData.name = prop.name;
+  propertyData.matchName = prop.matchName;
+  propertyData.value = prop.value;
+  propertyData.keyframes = [];
 
-  return propPath; // Return the built property path
+  // Store keyframe data if applicable
+  if (prop.numKeys > 0) {
+    for (var i = 1; i <= prop.numKeys; i++) {
+      propertyData.keyframes.push({
+        time: prop.keyTime(i),
+        value: prop.keyValue(i),
+        temporalEaseIn: prop.keyInTemporalEase(i),
+        temporalEaseOut: prop.keyOutTemporalEase(i),
+      });
+    }
+  }
+
+  return { propPath: propertyPath, propData: propertyData }; // Return the built property path
 }
 function find_layer_property_by_matchName(
   layer,
@@ -97,11 +142,13 @@ function find_layer_property_by_matchName(
   layerToSkip
 ) {
   var currentLayer = layer; // Start with the given layer
-  if (
-    currentLayer.name === layerToSkip.name &&
-    currentLayer.index === layerToSkip.index
-  ) {
-    return null;
+  if (layerToSkip !== null) {
+    if (
+      currentLayer.name === layerToSkip.name &&
+      currentLayer.index === layerToSkip.index
+    ) {
+      return null;
+    }
   }
 
   // Traverse down the property path on the layer
@@ -192,9 +239,35 @@ function clearExpression(prop) {
 }
 function store_selected_properties_data(layer) {
   var props_array = find_selected_properties_on_layer(layer);
+  selectedPropertyData = []; // Initialize selectedPropertyData as an array
   for (var n = 0; n < props_array.length; n++) {
-    var propertyPathProps = get_selected_property_to_search(props_array[n]);
+    var selectedProperty_Object = get_selected_property_to_search(
+      props_array[n]
+    );
+    selectedPropertyData.push(selectedProperty_Object); // Store each selected property object in selectedPropertyData array
   }
+}
+function paste_selected_properties_data(selectedLayers) {
+  for (var n = 0; n < selectedPropertyData.length; n++) {
+    var propertyPathProps = selectedPropertyData[n].propPath;
+    var propertyPathData = selectedPropertyData[n].propData;
+
+    for (var m = 0; m < selectedLayers.length; m++) {
+      var foundProperty = find_layer_property_by_matchName(
+        selectedLayers[m],
+        propertyPathProps,
+        null
+      );
+      if (foundProperty) {
+        clearExpression(foundProperty);
+        copyValue(propertyPathData.value, foundProperty);
+        // copyExpression(props_array[n], foundProperty);
+        // copyKeyframes(props_array[n], foundProperty);
+      }
+    }
+  }
+  alert("copied props!");
+  //   alert(selectedPropertyData[0].propData.name);
 }
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
