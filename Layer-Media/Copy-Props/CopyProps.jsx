@@ -119,8 +119,15 @@ function copyKeyframes(propToCopy, prop) {
         var keyframeValue = propToCopy.keyValue(i);
         var keyframeTime = propToCopy.keyTime(i);
 
+        // Copy keyframe temporal easing
+        var temporalEaseIn = propToCopy.keyInTemporalEase(i);
+        var temporalEaseOut = propToCopy.keyOutTemporalEase(i);
+
         // Add keyframe to 'prop' with the same value and time
-        prop.setValueAtTime(keyframeTime, keyframeValue);
+        // prop.setValueAtTime(keyframeTime, keyframeValue);
+        var newKeyIndex = prop.addKey(keyframeTime);
+        prop.setValueAtKey(newKeyIndex, keyframeValue);
+        prop.setTemporalEaseAtKey(newKeyIndex, temporalEaseIn, temporalEaseOut);
       }
     } catch (err) {
       null;
