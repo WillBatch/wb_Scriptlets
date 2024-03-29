@@ -6,11 +6,6 @@ var allLayersInComp = true;
 
 // alert(selectedPropsObject_Effects.effect.name);
 
-//Effects properties that we want to grab are going to be .propertyType == PropertyType.PROPERTY
-//An Effect like "Fill" is going to be PropertyType.NAMED_GROUP
-
-// copypaste_effects_activecomp_MAIN(app.project.activeItem.selectedLayers[0]);
-// var deepestSelectedProp = rd_GimmePropPath_findDeepestSelectedProp();
 app.beginUndoGroup("1");
 find_selected_properties_on_layer(app.project.activeItem.selectedLayers[0]);
 app.endUndoGroup();
@@ -99,6 +94,15 @@ function find_selected_properties_on_layer(layer) {
     }
   }
 }
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//OLD CODE//
+//Effects properties that we want to grab are going to be .propertyType == PropertyType.PROPERTY
+//An Effect like "Fill" is going to be PropertyType.NAMED_GROUP
+// copypaste_effects_activecomp_MAIN(app.project.activeItem.selectedLayers[0]);
+// var deepestSelectedProp = rd_GimmePropPath_findDeepestSelectedProp();
 //ALL EFFECTS PROPERTIES ONLY
 function copypaste_effects_activecomp_MAIN(selectedLayer) {
   var selectedPropsObject_Effects = (function (layer, parentProp_matchName) {
