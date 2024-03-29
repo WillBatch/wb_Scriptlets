@@ -1,6 +1,8 @@
-// var comp = app.project.activeItem;
-// var layer = comp.selectedLayers[0];
-// var layerProps = layer.numProperties;
+var comp = app.project.activeItem;
+var layer = comp.selectedLayers[0];
+var layerProps = layer.numProperties;
+var newLayer = app.project.activeItem.layer(1); //temp layer
+var allLayersInComp = true;
 
 // alert(selectedPropsObject_Effects.effect.name);
 
@@ -8,10 +10,95 @@
 //An Effect like "Fill" is going to be PropertyType.NAMED_GROUP
 
 // copypaste_effects_activecomp_MAIN(app.project.activeItem.selectedLayers[0]);
+// var deepestSelectedProp = rd_GimmePropPath_findDeepestSelectedProp();
+app.beginUndoGroup("1");
+find_selected_properties_on_layer(app.project.activeItem.selectedLayers[0]);
+app.endUndoGroup();
 
-var deepestSelectedProp = rd_GimmePropPath_findDeepestSelectedProp();
-alert(deepestSelectedProp.parentProperty.name);
+function find_selected_properties_on_layer(layer) {
+  //Get all selected properties on the layer
+  var props_array = [];
+  for (var i = 0; i < layer.selectedProperties.length; i++) {
+    if (layer.selectedProperties[i].propertyType === PropertyType.PROPERTY) {
+      props_array.push(layer.selectedProperties[i]);
+    }
+  }
 
+  for (var n = 0; n < props_array.length; n++) {
+    var propertyPathProps = buildPropPath(props_array[n]);
+    if (allLayersInComp === true) {
+      for (var m = 1; m <= comp.numLayers; m++) {
+        var foundProperty = findPropertyByPath(
+          comp.layer(m),
+          propertyPathProps
+        );
+        if (foundProperty) {
+          copyValue(props_array[n].value, foundProperty);
+          copyExpression(props_array[n], foundProperty);
+        }
+      }
+    }
+    // copyValue(props_array[n].value, foundProperty);
+  }
+  function buildPropPath(prop) {
+    var propPath = []; // Initialize an array to store the property path
+    var currentProp = prop; // Start with the given property
+
+    // Traverse backward through the parentProperty chain until reaching the root level
+    while (currentProp.parentProperty !== null) {
+      propPath.unshift(currentProp.matchName); // Add the matchName of the current property to the beginning of the array
+      currentProp = currentProp.parentProperty; // Move to the parent property
+    }
+    // Add the root property's name (usually the property of the layer) to the path
+    //   propPath.unshift(currentProp.name);
+
+    // Join the elements of the array to form the complete property path
+    return propPath; // Return the built property path
+  }
+  function findPropertyByPath(layer, propertyPathProps) {
+    var currentLayer = layer; // Start with the given layer
+
+    // Traverse down the property path on the layer
+    for (var i = 0; i < propertyPathProps.length; i++) {
+      var propertyName = propertyPathProps[i];
+
+      // Find the property with the current matchName on the current layer
+      var foundProperty = null;
+      for (var j = 1; j <= currentLayer.numProperties; j++) {
+        var property = currentLayer.property(j);
+        if (property.matchName === propertyName) {
+          foundProperty = property;
+          break;
+        }
+      }
+
+      // If the property is found and it's not the last property in the path, move to its child property
+      if (foundProperty !== null && i < propertyPathProps.length - 1) {
+        currentLayer = foundProperty;
+      } else {
+        return foundProperty; // Return the found property
+      }
+    }
+
+    return null; // Return null if the property is not found
+  }
+  function copyValue(propToCopy, prop) {
+    try {
+      prop.setValue(propToCopy);
+    } catch (err) {
+      null;
+    }
+  }
+  function copyExpression(propToCopy, prop) {
+    if (propToCopy.expressionEnabled) {
+      try {
+        prop.expression = propToCopy.expression;
+      } catch (err) {
+        null;
+      }
+    }
+  }
+}
 //ALL EFFECTS PROPERTIES ONLY
 function copypaste_effects_activecomp_MAIN(selectedLayer) {
   var selectedPropsObject_Effects = (function (layer, parentProp_matchName) {
@@ -93,6 +180,7 @@ function copypaste_effects_activecomp_MAIN(selectedLayer) {
     }
   }
 }
+
 function rd_GimmePropPath_findDeepestSelectedProp() {
   var comp = app.project.activeItem;
   var deepestProp,
@@ -112,4 +200,12 @@ function rd_GimmePropPath_findDeepestSelectedProp() {
   }
 
   return numDeepestProps > 1 ? null : deepestProp;
+}
+// display_prop_names(props_array);
+function display_prop_names(props_array) {
+  var myAlert = "\n";
+  for (var m = 0; m < props_array.length; m++) {
+    myAlert += props_array[m].name + "\n";
+  }
+  alert(myAlert);
 }
