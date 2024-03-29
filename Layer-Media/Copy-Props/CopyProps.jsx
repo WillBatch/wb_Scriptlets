@@ -1,3 +1,9 @@
+var green600 = [0, 132, 15];
+var blue600 = [6, 108, 231];
+var grey100 = [29, 29, 29];
+var grey600 = [176, 176, 176];
+// var selectedPropertyData = null;
+
 (function (thisObj) {
   scriptBuildUI(thisObj);
   function scriptBuildUI(thisObj) {
@@ -7,26 +13,30 @@
         : new Window("palette", "Copy Cat", undefined, {
             resizeable: true,
           });
-    win.spacing = 0;
+    win.spacing = 3;
     win.orientation = "column";
+    win.alignChildren = "left";
 
     var group1 = win.add("group"); // Create a group for the first row
     group1.orientation = "row"; // Set the group orientation to "row"
-    group1.spacing = 3;
+    group1.spacing = 5;
+    var group2 = win.add("group"); // Create a group for the first row
+    group2.orientation = "row"; // Set the group orientation to "row"
+    group2.spacing = 5;
 
     function FancyButton(
       parentGroup,
       params,
       changeColorState_Fill,
-      changeColorState_Stroke,
-      strokeColor,
-      strokeWidth
+      changeColorState_Stroke
     ) {
       var button = parentGroup.add("customButton", undefined, "");
       button.width = params.width;
       button.height = params.height;
       button.text = params.text;
       button.color = params.color;
+      button.strokeWidth = params.strokeWidth;
+      button.strokeColor = params.strokeColor;
 
       button.preferredSize.height = button.height;
       button.preferredSize.width = button.width;
@@ -36,9 +46,7 @@
           button,
           true,
           changeColorState_Fill,
-          changeColorState_Stroke,
-          strokeColor,
-          strokeWidth
+          changeColorState_Stroke
         );
       });
       button.addEventListener("mouseout", function () {
@@ -46,18 +54,14 @@
           button,
           false,
           changeColorState_Fill,
-          changeColorState_Stroke,
-          strokeColor,
-          strokeWidth
+          changeColorState_Stroke
         );
       });
       drawFancyButton(
         button,
         false,
         changeColorState_Fill,
-        changeColorState_Stroke,
-        strokeColor,
-        strokeWidth
+        changeColorState_Stroke
       );
 
       return button;
@@ -66,9 +70,7 @@
       button,
       hover,
       changeColorState_Fill,
-      changeColorState_Stroke,
-      strokeColor,
-      strokeWidth
+      changeColorState_Stroke
     ) {
       var g = button.graphics;
       var fillBrush;
@@ -82,44 +84,34 @@
       ]);
 
       // Create a stroke pen
-      var strokePen = g.newPen(
+      strokePen = g.newPen(
         g.PenType.SOLID_COLOR,
-        [strokeColor[0] / 255, strokeColor[1] / 255, strokeColor[2] / 255, 1], // Stroke color
-        strokeWidth // Stroke width
+        [
+          button.strokeColor[0] / 255,
+          button.strokeColor[1] / 255,
+          button.strokeColor[2] / 255,
+          1,
+        ], // Stroke color
+        button.strokeWidth // Stroke width
       );
-
-      if (changeColorState_Fill === true || changeColorState_Stroke === true) {
-        changeColorState = true;
-      }
 
       var textPen; // <-- new textPen variable
       if (hover) {
         textPen = g.newPen(
           g.PenType.SOLID_COLOR,
-          [255 / 255, 255 / 255, 255 / 255, 1],
+          [220 / 255, 220 / 255, 220 / 255, 1],
           1
         ); // <-- define textPen when hover is true
       } else {
         textPen = g.newPen(
           g.PenType.SOLID_COLOR,
-          [0 / 255, 0 / 255, 0 / 255, 1],
+          [grey600[0] / 255, grey600[1] / 255, grey600[2] / 255, 1],
           1
         ); // <-- define textPen when hover is false
       }
       var textSize = g.measureString(button.text);
 
       button.onDraw = function () {
-        var blueBrush = g.newBrush(g.BrushType.SOLID_COLOR, [
-          0 / 255,
-          152 / 255,
-          255 / 255,
-          1,
-        ]);
-        var blackPen = g.newPen(
-          g.PenType.SOLID_COLOR,
-          [0 / 255, 0 / 255, 0 / 255, 1],
-          1
-        );
         var textSize = g.measureString(button.text);
         var textX = (this.size.width - textSize.width) / 2;
         var textY = (this.size.height - textSize.height) / 2;
@@ -133,8 +125,6 @@
           (this.width - textSize.width) / 2,
           (this.height - textSize.height) / 2
         );
-        // Draw the border stroke
-        // g.drawRoundRect(0, 0, this.width, this.height, 15, strokePen);
       };
     }
 
@@ -144,31 +134,21 @@
         width: 80,
         height: 20,
         text: "Store",
-        color: [0, 152, 255],
+        color: grey100,
+        strokeWidth: 2,
+        strokeColor: grey600,
       },
       true,
-      false,
-      [255, 255, 255],
-      3
+      false
     );
-
-    // Function to update button label
-    function updateButtonLabel() {
-      if (selectedPropertyData !== null) {
-        button_StoreSelectedPropertiesData.text = "Stored";
-        button_StoreSelectedPropertiesData.color = [150, 0, 0];
-      } else {
-        button_StoreSelectedPropertiesData.text = "Store";
-      }
-    }
 
     button_StoreSelectedPropertiesData.onClick = function () {
       ///function goes here
       if (app.project.activeItem.selectedLayers[0]) {
-        store_selected_properties_data(
+        var updateData = store_selected_properties_data(
           app.project.activeItem.selectedLayers[0]
         );
-        updateButtonLabel();
+        updateButtonLabel(updateData);
       } else {
         alert("Select some properties");
       }
@@ -180,19 +160,27 @@
         width: 80,
         height: 20,
         text: "Paste",
-        color: [0, 152, 255],
+        color: grey100,
+        strokeWidth: 2,
+        strokeColor: grey600,
       },
       false,
-      true,
-      [255, 0, 0],
-      1
+      true
     );
+
     button_PasteStoredPropertiesData.onClick = function () {
       if (
         selectedPropertyData !== null &&
         app.project.activeItem.selectedLayers.length !== 0
       ) {
-        paste_selected_properties_data(app.project.activeItem.selectedLayers);
+        paste_selected_properties_data(
+          app.project.activeItem.selectedLayers,
+          dropdown_PasteToOption.selection.index
+        );
+        // Change button text to "Pasted!"
+        // this.text = "Pasted!";
+
+        // Revert back to "Paste" after 3 seconds
       }
       if (selectedPropertyData === null) {
         alert("No stored data");
@@ -201,6 +189,32 @@
         alert("Select some layers");
       }
     };
+    var staticText_CopyTo = group2.add("statictext", undefined, "Paste to");
+    var dropdown_PasteToOption_array = [
+      "Selected Layers",
+      "Comp Layers",
+      "Project Layers",
+    ];
+    var dropdown_PasteToOption = group2.add(
+      "dropdownlist",
+      undefined,
+      undefined,
+      {
+        name: "dropdown1",
+        items: dropdown_PasteToOption_array,
+      }
+    );
+    dropdown_PasteToOption.selection = 0;
+
+    // Function to update button label
+    function updateButtonLabel(updateData) {
+      selectedPropertyData = updateData;
+      if (selectedPropertyData !== null) {
+        button_StoreSelectedPropertiesData.text = "Stored!";
+      } else {
+        button_StoreSelectedPropertiesData.text = "Store";
+      }
+    }
     win.onResizing = win.onResize = function () {
       this.layout.resize();
     };
@@ -215,18 +229,6 @@
 
 // Define a variable to store the selected property data
 var selectedPropertyData = null;
-// var comp = app.project.activeItem;
-// var layer = comp.selectedLayers[0];
-// var layerProps = layer.numProperties;
-// var newLayer = app.project.activeItem.layer(1); //temp layer
-// var allLayersInComp = true;
-
-// app.beginUndoGroup("1");
-// var selectedLayerProperties = find_selected_properties_on_layer(
-//   app.project.activeItem.selectedLayers[0]
-// );
-// copy_selected_properties(selectedLayerProperties);
-// app.endUndoGroup();
 
 function find_selected_properties_on_layer(layer) {
   //Get all selected properties on the layer
@@ -399,12 +401,32 @@ function store_selected_properties_data(layer) {
     );
     selectedPropertyData.push(selectedProperty_Object); // Store each selected property object in selectedPropertyData array
   }
+  return selectedPropertyData;
 }
-function paste_selected_properties_data(selectedLayers) {
+function paste_selected_properties_data(
+  selectedLayers,
+  dropdown_PasteToOption
+) {
   for (var n = 0; n < selectedPropertyData.length; n++) {
     var propertyPathProps = selectedPropertyData[n].propPath;
     var propertyPathData = selectedPropertyData[n].propData;
-    // alert(propertyPathData.prop.expression);
+    var loopInteger;
+    var loopCondition;
+    var loopLayers;
+
+    switch (dropdown_PasteToOption) {
+      case 0:
+        loopInteger = 0;
+        loopCondition = selectedLayers.length;
+        loopLayers = selectedLayers; //An Array
+        break;
+      case 1:
+        alert("1");
+        break;
+      case 2:
+        alert("2");
+        break;
+    }
     for (var m = 0; m < selectedLayers.length; m++) {
       var foundProperty = find_layer_property_by_matchName(
         selectedLayers[m],
@@ -419,7 +441,6 @@ function paste_selected_properties_data(selectedLayers) {
       }
     }
   }
-  alert("copied props!");
   //   alert(selectedPropertyData[0].propData.name);
 }
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
