@@ -177,22 +177,25 @@ var grey600 = [176, 176, 176];
     );
 
     button_PasteStoredPropertiesData.onClick = function () {
-      if (
-        selectedPropertyData !== null &&
-        app.project.activeItem.selectedLayers.length !== 0
-      ) {
-        app.beginUndoGroup("Paste");
-        paste_selected_properties_data(
-          app.project.activeItem.selectedLayers,
-          dropdown_PasteToOption.selection.index
-        );
-        app.endUndoGroup();
-      }
-      if (selectedPropertyData === null) {
-        alert("No stored data");
-      }
-      if (app.project.activeItem.selectedLayers.length === 0) {
-        alert("Select some layers");
+      switch (dropdown_PasteToOption.selection.index) {
+        case 1:
+          if (
+            selectedPropertyData !== null &&
+            app.project.activeItem.selectedLayers.length !== 0
+          ) {
+            app.beginUndoGroup("Paste");
+            paste_selected_properties_data(
+              app.project.activeItem.selectedLayers,
+              dropdown_PasteToOption.selection.index
+            );
+            app.endUndoGroup();
+          }
+          if (selectedPropertyData === null) {
+            alert("No stored data");
+          }
+          if (app.project.activeItem.selectedLayers.length === 0) {
+            alert("Select some layers");
+          }
       }
     };
     var button_LinkPropertiesWithExpressions = new FancyButton(
@@ -213,15 +216,15 @@ var grey600 = [176, 176, 176];
         selectedPropertyData !== null &&
         app.project.activeItem.selectedLayers.length !== 0
       ) {
+        app.beginUndoGroup("link");
         link_selected_properties_data(
           app.project.activeItem.selectedLayers,
           dropdown_PasteToOption.selection.index
         );
-      }
-      if (selectedPropertyData === null) {
+        app.endUndoGroup();
+      } else if (selectedPropertyData === null) {
         alert("No stored data");
-      }
-      if (app.project.activeItem.selectedLayers.length === 0) {
+      } else if (app.project.activeItem.selectedLayers.length === 0) {
         alert("Select some layers");
       }
     };
@@ -406,6 +409,7 @@ function paste_selected_properties_data(
   for (var n = 0; n < selectedPropertyData.length; n++) {
     var propertyPathProps = selectedPropertyData[n].propPath;
     var propertyPathData = selectedPropertyData[n].propData;
+    var skipLayer = selectedPropertyData[n].propLayer;
     var loopInteger;
     var loopCondition;
     var loopLayers;
@@ -448,7 +452,7 @@ function paste_selected_properties_data(
         var foundProperty = find_layer_property_by_matchName(
           loopLayer_forLoop,
           propertyPathProps,
-          null
+          skipLayer
         );
         if (foundProperty) {
           clearExpression(foundProperty);
@@ -462,82 +466,115 @@ function paste_selected_properties_data(
   //   alert(selectedPropertyData[0].propData.name);
 }
 function link_selected_properties_data(selectedLayers, dropdown_PasteToOption) {
-  // alert("here");
-  for (var n = 0; n < selectedPropertyData.length; n++) {
-    var propertyPathProps = selectedPropertyData[n].propPath;
-    var propertyPathProps_Name = selectedPropertyData[n].propPath_name;
-    var propertyPathData = selectedPropertyData[n].propData;
-    var propertyLayer = selectedPropertyData[n].propLayer;
-    var propertyLayerComp = propertyLayer.containingComp;
-    var loopInteger;
-    var loopCondition;
-    var loopLayers;
-    var propertyPathPropsNameString = propertyPathProps_Name
-      .join(".")
-      .toLowerCase();
+  //Deselect all layers
+  app.executeCommand(2004);
 
-    var expressionToAdd =
-      "" +
-      'comp("' +
-      propertyLayerComp.name.toString() +
-      '").' +
-      'layer("' +
-      propertyLayer.name.toString() +
-      '").';
-
-    // alert(expressionToAdd);
-
-    switch (dropdown_PasteToOption) {
-      case 0:
-        loopInteger = 0;
-        loopCondition = selectedLayers.length;
-        loopLayers = selectedLayers; //An Array
-        loop_through_and_paste_properties();
-        break;
-      case 1:
-        loopInteger = 1;
-        loopCondition = app.project.activeItem.numLayers + 1;
-        loopLayers = app.project.activeItem; //An Array
-        loop_through_and_paste_properties();
-        break;
-      case 2:
-        var proj = app.project;
-        for (var j = 1; j <= proj.numItems; j++) {
-          var compItem = proj.item(j);
-          if (compItem instanceof CompItem) {
-            // If item is a composition
-            loopInteger = 1;
-            loopCondition = compItem.numLayers + 1;
-            loopLayers = compItem;
-            loop_through_and_paste_properties();
-          }
-        }
-        break;
+  //Select all selected properties and copy with property links
+  (function () {
+    for (var b = 0; b < selectedPropertyData.length; b++) {
+      selectedPropertyData[b].propData.prop.selected = true;
     }
-    function loop_through_and_paste_properties() {
-      for (var m = loopInteger; m < loopCondition; m++) {
-        var loopLayer_forLoop;
-        if (loopLayers instanceof Array) {
-          loopLayer_forLoop = loopLayers[m];
-        } else {
-          loopLayer_forLoop = loopLayers.layer(m);
+    //Copy with property links
+    app.executeCommand(10310);
+
+    //Deselect all layers
+    app.executeCommand(2004);
+
+    //Deselect the layer
+    var selectedCompLayers = app.project.activeItem.selectedLayers; // Get a reference to the selected layers
+    var numCompLayers = selectedCompLayers.length; // Get the initial number of selected layers
+
+    // Loop until all layers are deselected
+    while (numCompLayers > 0) {
+      selectedCompLayers[numCompLayers - 1].selected = false; // Deselect the last selected layer
+      numCompLayers--; // Decrement the count of selected layers
+    }
+
+    // app.project.activeItem.selectedLayers[0].selected = false;
+  })();
+
+  // for (var n = 0; n < selectedPropertyData.length; n++) {
+  //   // var propertyDataProp = selectedPropertyData[n];
+  // var propertyPathProps = selectedPropertyData[n].propPath;
+  //   // var propertyPathProps_Name = selectedPropertyData[n].propPath_name;
+  //   // var propertyPathData = selectedPropertyData[n].propData;
+  //   // var propertyLayer = selectedPropertyData[n].propLayer;
+  //   // var propertyLayerComp = propertyLayer.containingComp;
+  //   // var loopInteger;
+  //   // var loopCondition;
+  //   // var loopLayers;
+  //   // var propertyPathPropsNameString = propertyPathProps_Name
+  //   //   .join(".")
+  //   //   .toLowerCase();
+
+  //   // var expressionToAdd =
+  //   //   "" +
+  //   //   'comp("' +
+  //   //   propertyLayerComp.name.toString() +
+  //   //   '").' +
+  //   //   'layer("' +
+  //   //   propertyLayer.name.toString() +
+  //   //   '").';
+
+  switch (dropdown_PasteToOption) {
+    case 0:
+      loopInteger = 0;
+      loopCondition = selectedLayers.length;
+      loopLayers = selectedLayers; //An Array
+      loop_through_layers_and_paste_commandID();
+      break;
+    case 1:
+      loopInteger = 1;
+      loopCondition = app.project.activeItem.numLayers + 1;
+      loopLayers = app.project.activeItem; //An Array
+      loop_through_layers_and_paste_commandID();
+      break;
+    case 2:
+      var proj = app.project;
+      for (var j = 1; j <= proj.numItems; j++) {
+        var compItem = proj.item(j);
+        if (compItem instanceof CompItem) {
+          // If item is a composition
+          loopInteger = 1;
+          loopCondition = compItem.numLayers + 1;
+          loopLayers = compItem;
+          loop_through_layers_and_paste_commandID();
         }
+      }
+      break;
+  }
+  function loop_through_layers_and_paste_commandID() {
+    //Loop through each layer, either selected, in comp, or in project
+    for (var m = loopInteger; m < loopCondition; m++) {
+      var loopLayer_forLoop;
+      if (loopLayers instanceof Array) {
+        loopLayer_forLoop = loopLayers[m];
+      } else {
+        loopLayer_forLoop = loopLayers.layer(m);
+      }
+      var matchedPropertiesCount = 0;
+
+      // Check if the current property's match name matches any item in propertyPathProps using our function
+      for (var i = 0; i < selectedPropertyData.length; i++) {
         var foundProperty = find_layer_property_by_matchName(
           loopLayer_forLoop,
-          propertyPathProps,
-          null
+          selectedPropertyData[i].propPath,
+          selectedPropertyData[0].propLayer
         );
         if (foundProperty) {
-          addExpression(propertyPathData.prop, foundProperty);
-
-          // copyValue(propertyPathData.value, foundProperty);
-          // copyExpression(propertyPathData.prop, foundProperty);
-          // copyKeyframes(props_array[n], foundProperty);
-        }
+          matchedPropertiesCount++;
+        } // Increment counter for matched properties
+      }
+      // Check if all properties match
+      if (matchedPropertiesCount === selectedPropertyData.length) {
+        // All properties match, perform your action here
+        // For example:
+        loopLayer_forLoop.selected = true; // Select the layer
+        app.executeCommand(20); // Execute command
+        loopLayer_forLoop.selected = false; // Deselect the layer
       }
     }
   }
-  //   alert(selectedPropertyData[0].propData.name);
 }
 function copyValue(propToCopy, prop) {
   try {
@@ -582,16 +619,15 @@ function copyKeyframes(propToCopy, prop) {
   }
 }
 function addExpression(propToCopy, prop) {
-  prop.selected = true;
-  app.beginUndoGroup("I hate this");
-  app.executeCommand(2702);
-  app.endUndoGroup();
-  app.executeCommand(2035);
-  prop.selected = false;
+  // prop.selected = true;
+
+  // // app.beginUndoGroup("I hate this");
+  // // app.executeCommand(2702);
+  // // app.endUndoGroup();
+  // // app.executeCommand(2035);
+  // prop.selected = false;
   try {
-    var curExp = prop.expression;
-    // alert(curExp);
-    // prop.expression = "FUCK YOU " + curExp.toString();
+    null;
   } catch (err) {
     null;
   }
