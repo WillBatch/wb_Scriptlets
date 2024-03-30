@@ -177,25 +177,36 @@ var grey600 = [176, 176, 176];
     );
 
     button_PasteStoredPropertiesData.onClick = function () {
-      switch (dropdown_PasteToOption.selection.index) {
-        case 1:
-          if (
-            selectedPropertyData !== null &&
-            app.project.activeItem.selectedLayers.length !== 0
-          ) {
-            app.beginUndoGroup("Paste");
-            paste_selected_properties_data(
-              app.project.activeItem.selectedLayers,
-              dropdown_PasteToOption.selection.index
-            );
-            app.endUndoGroup();
-          }
-          if (selectedPropertyData === null) {
-            alert("No stored data");
-          }
-          if (app.project.activeItem.selectedLayers.length === 0) {
-            alert("Select some layers");
-          }
+      if (selectedPropertyData !== null) {
+        switch (dropdown_PasteToOption.selection.index) {
+          case 0:
+            if (app.project.activeItem.selectedLayers.length !== 0) {
+              go_paste();
+            } else {
+              alert("Select some layers");
+            }
+            break;
+          case 1:
+            if (app.project.activeItem) {
+              go_paste();
+            } else {
+              alert("Active Comp not found");
+            }
+            break;
+          case 2:
+            go_paste();
+            break;
+        }
+      } else {
+        alert("No stored data");
+      }
+      function go_paste() {
+        app.beginUndoGroup("Paste");
+        paste_selected_properties_data(
+          app.project.activeItem.selectedLayers,
+          dropdown_PasteToOption.selection.index
+        );
+        app.endUndoGroup();
       }
     };
     var button_LinkPropertiesWithExpressions = new FancyButton(
@@ -212,20 +223,36 @@ var grey600 = [176, 176, 176];
       false
     );
     button_LinkPropertiesWithExpressions.onClick = function () {
-      if (
-        selectedPropertyData !== null &&
-        app.project.activeItem.selectedLayers.length !== 0
-      ) {
-        app.beginUndoGroup("link");
+      if (selectedPropertyData !== null) {
+        switch (dropdown_PasteToOption.selection.index) {
+          case 0:
+            if (app.project.activeItem.selectedLayers.length !== 0) {
+              go_link();
+            } else {
+              alert("Select some layers");
+            }
+            break;
+          case 1:
+            if (app.project.activeItem) {
+              go_link();
+            } else {
+              alert("Active Comp not found");
+            }
+            break;
+          case 2:
+            go_link();
+            break;
+        }
+      } else {
+        alert("No stored data");
+      }
+      function go_link() {
+        app.beginUndoGroup("Link");
         link_selected_properties_data(
           app.project.activeItem.selectedLayers,
           dropdown_PasteToOption.selection.index
         );
         app.endUndoGroup();
-      } else if (selectedPropertyData === null) {
-        alert("No stored data");
-      } else if (app.project.activeItem.selectedLayers.length === 0) {
-        alert("Select some layers");
       }
     };
     var button_AlertStoredProperties = new FancyButton(
