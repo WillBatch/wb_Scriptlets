@@ -485,7 +485,7 @@ function paste_selected_properties_data(
           clearExpression(foundProperty);
           copyValue(propertyPathData.value, foundProperty);
           copyExpression(propertyPathData.prop, foundProperty);
-          // copyKeyframes(props_array[n], foundProperty);
+          copyKeyframes(propertyPathData.prop, foundProperty);
         }
       }
     }
@@ -516,32 +516,7 @@ function link_selected_properties_data(selectedLayers, dropdown_PasteToOption) {
       selectedCompLayers[numCompLayers - 1].selected = false; // Deselect the last selected layer
       numCompLayers--; // Decrement the count of selected layers
     }
-
-    // app.project.activeItem.selectedLayers[0].selected = false;
   })();
-
-  // for (var n = 0; n < selectedPropertyData.length; n++) {
-  //   // var propertyDataProp = selectedPropertyData[n];
-  // var propertyPathProps = selectedPropertyData[n].propPath;
-  //   // var propertyPathProps_Name = selectedPropertyData[n].propPath_name;
-  //   // var propertyPathData = selectedPropertyData[n].propData;
-  //   // var propertyLayer = selectedPropertyData[n].propLayer;
-  //   // var propertyLayerComp = propertyLayer.containingComp;
-  //   // var loopInteger;
-  //   // var loopCondition;
-  //   // var loopLayers;
-  //   // var propertyPathPropsNameString = propertyPathProps_Name
-  //   //   .join(".")
-  //   //   .toLowerCase();
-
-  //   // var expressionToAdd =
-  //   //   "" +
-  //   //   'comp("' +
-  //   //   propertyLayerComp.name.toString() +
-  //   //   '").' +
-  //   //   'layer("' +
-  //   //   propertyLayer.name.toString() +
-  //   //   '").';
 
   switch (dropdown_PasteToOption) {
     case 0:
@@ -594,10 +569,18 @@ function link_selected_properties_data(selectedLayers, dropdown_PasteToOption) {
       }
       // Check if all properties match
       if (matchedPropertiesCount === selectedPropertyData.length) {
-        // All properties match, perform your action here
-        // For example:
+        // All properties match
         loopLayer_forLoop.selected = true; // Select the layer
         app.executeCommand(20); // Execute command
+        // Now we need to delete the newly added keyframes. Good luck!
+        for (var d = 0; d < selectedPropertyData.length; d++) {
+          var foundProperty = find_layer_property_by_matchName(
+            loopLayer_forLoop,
+            selectedPropertyData[d].propPath,
+            selectedPropertyData[0].propLayer
+          );
+          clearKeyframes(foundProperty);
+        }
         loopLayer_forLoop.selected = false; // Deselect the layer
       }
     }
@@ -638,7 +621,7 @@ function copyKeyframes(propToCopy, prop) {
         // prop.setValueAtTime(keyframeTime, keyframeValue);
         var newKeyIndex = prop.addKey(keyframeTime);
         prop.setValueAtKey(newKeyIndex, keyframeValue);
-        prop.setTemporalEaseAtKey(newKeyIndex, temporalEaseIn, temporalEaseOut);
+        // prop.setTemporalEaseAtKey(newKeyIndex, temporalEaseIn, temporalEaseOut);
       }
     } catch (err) {
       null;
@@ -646,13 +629,7 @@ function copyKeyframes(propToCopy, prop) {
   }
 }
 function addExpression(propToCopy, prop) {
-  // prop.selected = true;
-
-  // // app.beginUndoGroup("I hate this");
-  // // app.executeCommand(2702);
-  // // app.endUndoGroup();
-  // // app.executeCommand(2035);
-  // prop.selected = false;
+  null;
   try {
     null;
   } catch (err) {
