@@ -204,7 +204,10 @@ var grey600 = [176, 176, 176];
         app.beginUndoGroup("Paste");
         paste_selected_properties_data(
           app.project.activeItem.selectedLayers,
-          dropdown_PasteToOption.selection.index
+          dropdown_PasteToOption.selection.index,
+          checkBox_copyValues.value,
+          checkBox_copyKeyframes.value,
+          checkBox_copyExpressions.value
         );
         app.endUndoGroup();
       }
@@ -293,7 +296,21 @@ var grey600 = [176, 176, 176];
       }
     );
     dropdown_PasteToOption.selection = 0;
-
+    var staticText_checkboxLabel = group3.add(
+      "statictext",
+      undefined,
+      "Paste:"
+    );
+    var checkBox_copyValues = group3.add("checkbox", undefined, "Value");
+    checkBox_copyValues.value = 1;
+    var checkBox_copyKeyframes = group3.add("checkbox", undefined, "Keyframe");
+    checkBox_copyKeyframes.value = 1;
+    var checkBox_copyExpressions = group3.add(
+      "checkbox",
+      undefined,
+      "Expression"
+    );
+    checkBox_copyExpressions.value = 1;
     // Function to update button label
     function updateButtonLabel(updateData) {
       selectedPropertyData = updateData;
@@ -431,7 +448,10 @@ function store_selected_properties_data(layer) {
 }
 function paste_selected_properties_data(
   selectedLayers,
-  dropdown_PasteToOption
+  dropdown_PasteToOption,
+  checkBox_copyValues,
+  checkBox_copyKeyframes,
+  checkBox_copyExpressions
 ) {
   for (var n = 0; n < selectedPropertyData.length; n++) {
     var propertyPathProps = selectedPropertyData[n].propPath;
@@ -483,9 +503,15 @@ function paste_selected_properties_data(
         );
         if (foundProperty) {
           clearExpression(foundProperty);
-          copyValue(propertyPathData.value, foundProperty);
-          copyExpression(propertyPathData.prop, foundProperty);
-          copyKeyframes(propertyPathData.prop, foundProperty);
+          if (checkBox_copyValues) {
+            copyValue(propertyPathData.value, foundProperty);
+          }
+          if (checkBox_copyKeyframes) {
+            copyKeyframes(propertyPathData.prop, foundProperty);
+          }
+          if (checkBox_copyExpressions) {
+            copyExpression(propertyPathData.prop, foundProperty);
+          }
         }
       }
     }
@@ -612,13 +638,16 @@ function copyKeyframes(propToCopy, prop) {
         // Get keyframe value and time from 'propToCopy'
         var keyframeValue = propToCopy.keyValue(i);
         var keyframeTime = propToCopy.keyTime(i);
-
+        var keyIndex = propToCopy.nearestKeyIndex(keyframeTime);
+        var keyTypeIn = propToCopy.keyInInterpolationType(keyIndex);
+        var keyTypeOut = propToCopy.keyOutInterpolationType(keyIndex);
+        // alert(keyTypeIn + "\n" + keyTypeOut);
         // Copy keyframe temporal easing
         var temporalEaseIn = propToCopy.keyInTemporalEase(i);
         var temporalEaseOut = propToCopy.keyOutTemporalEase(i);
 
-        // Add keyframe to 'prop' with the same value and time
-        // prop.setValueAtTime(keyframeTime, keyframeValue);
+        // alert(temporalEaseIn[0].speed + "   " + temporalEaseIn[0].influence);
+
         var newKeyIndex = prop.addKey(keyframeTime);
         prop.setValueAtKey(newKeyIndex, keyframeValue);
         // prop.setTemporalEaseAtKey(newKeyIndex, temporalEaseIn, temporalEaseOut);
