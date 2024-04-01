@@ -347,7 +347,6 @@ function find_selected_properties_on_layer(layer) {
   }
   return props_array;
 }
-
 function get_selected_property_to_search(prop, layer) {
   var propertyPath_matchName = []; // Initialize an array to store the property path
   var propertyPath_name = []; // Initialize an array to store the property path
