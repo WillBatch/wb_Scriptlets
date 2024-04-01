@@ -1,3 +1,5 @@
+//version 1.00
+
 //FOLD ALL SHORTCUT cmd + K cmd + 0
 //UNFORLD ALL cmd + K cmd + J
 
@@ -150,15 +152,29 @@ var grey600 = [176, 176, 176];
 
     button_StoreSelectedPropertiesData.onClick = function () {
       ///function goes here
-      if (
-        app.project.activeItem.selectedLayers[0].selectedProperties.length !== 0
-      ) {
-        var updateData = store_selected_properties_data(
-          app.project.activeItem.selectedLayers[0]
-        );
-        updateButtonLabel(updateData);
+      if (checkAltKey()) {
+        if (selectedPropertyData !== null) {
+          // alert(selectedPropertyData[0].propData.name);
+          display_prop_names(selectedPropertyData);
+        } else {
+          alert("No properties currently stored");
+        }
       } else {
-        alert("Select some properties");
+        if (app.project.activeItem) {
+          if (
+            app.project.activeItem.selectedLayers[0].selectedProperties
+              .length !== 0
+          ) {
+            var updateData = store_selected_properties_data(
+              app.project.activeItem.selectedLayers[0]
+            );
+            updateButtonLabel(updateData);
+          } else {
+            alert("Select some properties");
+          }
+        } else {
+          alert("Select some properties");
+        }
       }
     };
 
@@ -258,27 +274,28 @@ var grey600 = [176, 176, 176];
         app.endUndoGroup();
       }
     };
-    var button_AlertStoredProperties = new FancyButton(
-      group1,
-      {
-        width: 20,
-        height: 20,
-        text: ":)",
-        color: grey100,
-        strokeWidth: 2,
-        strokeColor: grey600,
-      },
-      false,
-      true
-    );
-    button_AlertStoredProperties.onClick = function () {
-      if (selectedPropertyData !== null) {
-        // alert(selectedPropertyData[0].propData.name);
-        display_prop_names(selectedPropertyData);
-      } else {
-        alert("No properties ready to paste");
-      }
-    };
+    // var button_AlertStoredProperties = new FancyButton(
+    //   group1,
+    //   {
+    //     width: 20,
+    //     height: 20,
+    //     text: ":)",
+    //     color: grey100,
+    //     strokeWidth: 2,
+    //     strokeColor: grey600,
+    //   },
+    //   false,
+    //   true
+    // );
+    // button_AlertStoredProperties.onClick = function () {
+    //   var alt = checkAltKey();
+    //   if (selectedPropertyData !== null) {
+    //     // alert(selectedPropertyData[0].propData.name);
+    //     display_prop_names(selectedPropertyData);
+    //   } else {
+    //     alert("No properties ready to paste");
+    //   }
+    // };
 
     var staticText_CopyTo = group2.add("statictext", undefined, "Paste to");
     var dropdown_PasteToOption_array = [
@@ -318,6 +335,14 @@ var grey600 = [176, 176, 176];
         button_StoreSelectedPropertiesData.text = "Stored!";
       } else {
         button_StoreSelectedPropertiesData.text = "Store";
+      }
+    }
+    function checkAltKey() {
+      var keyState = ScriptUI.environment.keyboardState;
+      if (keyState.altKey) {
+        return true;
+      } else {
+        return false;
       }
     }
     win.onResizing = win.onResize = function () {
