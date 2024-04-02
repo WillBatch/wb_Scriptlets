@@ -117,9 +117,8 @@ var compNamePrefix = "NW-ToA";
     browseButton.size = [85, 20];
     filePathText.size = [205, 20];
     rowLabelsInputText.size = [30, 20];
-
     startingLineTextInput.size = [30, 20];
-    prefixTextInput.size = [100, 20];
+    prefixTextInput.size = [120, 20];
 
     win.onResizing = win.onResize = function () {
       this.layout.resize();
@@ -185,8 +184,10 @@ function make_lower_third(
       searchText.property("Text").property("Source Text").setValue(values[i]);
     }
   }
-
-  var newCompName = prefix + "_" + "L3_" + textInputOne + "" + textInputTwo;
+  if (prefix) {
+    prefix += "_";
+  }
+  var newCompName = prefix + "L3_" + textInputOne + "" + textInputTwo;
   var newCompNameFormatted = newCompName.replace(/[<>:"\/\\|?*\s]/g, "");
 
   newComp.name = newCompNameFormatted;
