@@ -15,7 +15,7 @@ var grey600 = [176, 176, 176];
     var win =
       thisObj instanceof Panel
         ? thisObj
-        : new Window("palette", "Copy Cat", undefined, {
+        : new Window("palette", "The People's Copy-Paste", undefined, {
             resizeable: true,
           });
     win.spacing = 3;
@@ -149,7 +149,8 @@ var grey600 = [176, 176, 176];
       true,
       false
     );
-
+    button_StoreSelectedPropertiesData.helpTip =
+      "Select properties on a single layer to copy\nAlt-Click to display stored property values";
     button_StoreSelectedPropertiesData.onClick = function () {
       ///function goes here
       if (checkAltKey()) {
@@ -241,6 +242,8 @@ var grey600 = [176, 176, 176];
       true,
       false
     );
+    button_LinkPropertiesWithExpressions.helpTip =
+      "Same as running 'Copy with Property Links' but removes keyframes";
     button_LinkPropertiesWithExpressions.onClick = function () {
       if (selectedPropertyData !== null) {
         switch (dropdown_PasteToOption.selection.index) {
