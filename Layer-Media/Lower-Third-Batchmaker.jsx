@@ -9,17 +9,38 @@ var compNamePrefix = "NW-ToA";
     var win =
       thisObj instanceof Panel
         ? thisObj
-        : new Window("palette", "Copy Cat", undefined, {
+        : new Window("palette", "Lower Thirds From CSV", undefined, {
             resizeable: true,
           });
     win.spacing = 3;
     win.orientation = "column";
     win.alignChildren = "left";
 
-    var group1 = win.add("group"); // Create a group for the first row
+    // Create the tab control
+    var tabControl = win.add("tabbedpanel");
+    tabControl.alignChildren = "fill";
+
+    // Create the tabs
+    var tab1 = tabControl.add("tab", undefined, "Main");
+    tab1.alignChildren = "left";
+    var tab2 = tabControl.add("tab", undefined, "Settings");
+    tab2.alignChildren = "left";
+
+    //Tab One Button Groups
+    var group1 = tab1.add("group"); // Create a group for the first row
     group1.orientation = "row"; // Set the group orientation to "row"
     group1.spacing = 5;
-    var group2 = win.add("group"); // Create a group for the first row
+    var group2 = tab1.add("group"); // Create a group for the first row
+    group2.orientation = "row"; // Set the group orientation to "row"
+    group2.spacing = 5;
+    //Tab Two Button Groups
+    var group3 = tab2.add("group"); // Create a group for the first row
+    group1.orientation = "row"; // Set the group orientation to "row"
+    group1.spacing = 5;
+    var group4 = tab2.add("group"); // Create a group for the first row
+    group2.orientation = "row"; // Set the group orientation to "row"
+    group2.spacing = 5;
+    var group5 = tab2.add("group"); // Create a group for the first row
     group2.orientation = "row"; // Set the group orientation to "row"
     group2.spacing = 5;
 
@@ -45,8 +66,8 @@ var compNamePrefix = "NW-ToA";
         alert("Please select lower thirds template comp");
       }
     };
-    // Add a button to browse for a .csv file
 
+    // Add a button to browse for a .csv file
     var browseButton = group1.add("button", undefined, "Browse CSV");
     browseButton.onClick = function () {
       var csvFile = File.openDialog("Select a .csv file", "*.csv");
@@ -59,11 +80,63 @@ var compNamePrefix = "NW-ToA";
         }
       }
     };
+
     // Add a text field to display the selected file path
     var filePathText = group2.add("edittext", undefined, "", {
       multiline: false,
     });
-    filePathText.size = [200, 20];
+
+    // Add a text field for Line Count Variable
+    var startingLineLabel = group3.add(
+      "statictext",
+      undefined,
+      "CSV Row Start:"
+    );
+    var startingLineTextInput = group3.add("edittext", undefined, "1", {
+      multiline: false,
+    });
+    // Add a text field for Prefix variable
+    var prefixLabel = group3.add("statictext", undefined, "Prefix");
+    var prefixTextInput = group3.add("edittext", undefined, "", {
+      multiline: false,
+    });
+    // Add a text field for Text Line One variable
+    var textOneSearchNameLabel = group4.add(
+      "statictext",
+      undefined,
+      "Column 1 Search Text"
+    );
+    var textOneSearchNameTextInput = group4.add(
+      "edittext",
+      undefined,
+      "Line 1",
+      {
+        multiline: false,
+      }
+    );
+    // Add a text field for Prefix variable
+    var textTwoSearchNameLabel = group5.add(
+      "statictext",
+      undefined,
+      "Column 2 Search Text"
+    );
+    var textTwoSearchNameTextInput = group5.add(
+      "edittext",
+      undefined,
+      "Line 2",
+      {
+        multiline: false,
+      }
+    );
+
+    //Button Sizing
+    button_runMainScript.size = [120, 20];
+    browseButton.size = [85, 20];
+    filePathText.size = [205, 20];
+    startingLineTextInput.size = [30, 20];
+    prefixTextInput.size = [100, 20];
+    textOneSearchNameTextInput.size = [100, 20];
+    textTwoSearchNameTextInput.size = [100, 20];
 
     win.onResizing = win.onResize = function () {
       this.layout.resize();
@@ -85,20 +158,6 @@ function parseCSV(csvFile) {
 
     // Parse CSV data (this is a basic example)
     var lines = csvData.split("\n");
-    // alert(lines.length);
-    // for (var i = 0; i < lines.length; i++) {
-    //   var values = lines[i].split(",");
-    //   if (values.length >= 2) {
-    //     var columnOne = values[0].trim(); // Assuming first column
-    //     var columnTwo = values[1].trim(); // Assuming second column
-
-    //     // Process each line of CSV data
-    //     // You can do something with the values of columnOne and columnTwo here
-    //     // For example, create text layers in After Effects
-    //     // console.log("Column 1:", columnOne);
-    //     // console.log("Column 2:", columnTwo);
-    //   }
-    // }
   } else {
     alert("File not found.");
   }
