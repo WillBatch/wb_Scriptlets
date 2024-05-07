@@ -10,7 +10,7 @@ if (selectedItems && app.project.activeItem) {
   app.beginUndoGroup("Prep Text");
   decomposeTextFromComps(selectedItems_Comps, app.project.activeItem);
   app.endUndoGroup();
-  var promptDelete = confirm("Delete text compositions?"); // This line displays a confirmation dialog with a message and OK/Cancel buttons.
+  var promptDelete = confirm("Delete text compositions?");
   if (promptDelete) {
     app.beginUndoGroup("Delete");
     deleteSelectedItems_Comps(selectedItems_Comps);
