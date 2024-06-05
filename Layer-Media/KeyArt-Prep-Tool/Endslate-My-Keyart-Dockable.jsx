@@ -38,31 +38,33 @@ updateZIndexButton.onClick = function () {
 // Show the dockable panel
 myPanel.show();
 
-//Utility Functions
-function checkForProjectItem(variable, matchName) {
-  try {
-    project.item(variable);
-  } catch (err) {
-    return;
-  }
-  return checkForProjectItemName(project.item(variable), matchName);
-}
-function checkForProjectItemName(projectItem, matchName) {
-  if (projectItem.name === matchName) {
-    return projectItem;
-  } else {
-    alert(
-      "This project has been modified and the script will not work properly. Please make sure you have a project item:" +
-        "\n" +
-        matchName +
-        "\n" +
-        " in your project."
-    );
-  }
-}
 function executeMainScript() {
-  //Global Variable Declarations
   var project = app.project;
+  //Utility Functions
+
+  function checkForProjectItem(variable, matchName) {
+    try {
+      project.item(variable);
+    } catch (err) {
+      return;
+    }
+    return checkForProjectItemName(project.item(variable), matchName);
+  }
+  function checkForProjectItemName(projectItem, matchName) {
+    if (projectItem.name === matchName) {
+      return projectItem;
+    } else {
+      alert(
+        "This project has been modified and the script will not work properly. Please make sure you have a project item:" +
+          "\n" +
+          matchName +
+          "\n" +
+          " in your project."
+      );
+    }
+  }
+
+  //Global Variable Declarations
   var templateCompsFolder = checkForProjectItem(
     1,
     "---TEMPLATE COMPS---DO NOT MODIFY---"
