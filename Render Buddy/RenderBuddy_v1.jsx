@@ -128,6 +128,7 @@ function addMarkersToWorkArea(comp, markerNameIn, markerNameOut) {
     var workStart = comp.workAreaStart;
     var workDuration = comp.workAreaDuration;
     var workEnd = workStart + workDuration - singleFrame;
+    // var workEnd = workStart + workDuration;
 
     var compMarkerIn = new MarkerValue(markerNameIn.toString());
     compMarkerIn.duration = 0;
@@ -182,6 +183,7 @@ function setRenderArea(comp, markerNameIn, markerNameOut) {
   }
   function renderCompAreaFromMarkers(comp) {
     var frameRate = comp.frameRate;
+    var singleFrame = 1 / frameRate;
 
     // Search for START and END markers
     var compMarkers = comp.markerProperty.numKeys;
@@ -192,7 +194,7 @@ function setRenderArea(comp, markerNameIn, markerNameOut) {
     }
     if (inMarker != null && outMarker != null) {
       comp.workAreaStart = inMarker;
-      comp.workAreaDuration = outMarker - inMarker;
+      comp.workAreaDuration = outMarker - inMarker + singleFrame;
     }
 
     function findMarker(markers, searchString) {
